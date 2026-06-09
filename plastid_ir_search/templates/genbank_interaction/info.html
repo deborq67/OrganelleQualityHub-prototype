@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}IR Information for {{ accession }}{% endblock %}
+  {% block content %}
+
+    <div class="content">
+      <div class="container">
+        <h2 class="mb-2">IR Identification for {{ accession }}</h2>
+
+          {% if ir_result.ir_reported == "yes" %}
+            <div class="table">
+              <table class="table table-hover">
+                <tbody>
+                  <tr>
+                    <th scope="row">Accession</th>
+                      <td>{{ ir_result.accession }}</td>
+                      </tr>
+
+                      <tr>
+                        <th scope="row">IRa Start Position</th>
+                          <td>{{ ir_result.ira_reported_start }}</td>
+                          </tr>
+                          <tr>
+                            <th scope="row">IRa End Position</th>
+                              <td>{{ ir_result.ira_reported_end }}</td>
+                              </tr>
+                              <tr>
+                                <th scope="row">IRa Length (bp)</th>
+                                  <td>{{ ir_result.ira_reported_length }}</td>
+                                  </tr>
+
+                                  <tr>
+                                    <th scope="row">IRb Start Position</th>
+                                      <td>{{ ir_result.irb_reported_start }}</td>
+                                      </tr>
+                                      <tr>
+                                        <th scope="row">IRb End Position</th>
+                                          <td>{{ ir_result.irb_reported_end }}</td>
+                                          </tr>
+                                          <tr>
+                                            <th scope="row">IRb Length (bp)</th>
+                                              <td>{{ ir_result.irb_reported_length }}</td>
+                                              </tr>
+                                            </tbody>
+                                          </table>
+                                        </div>
+
+                                        {% elif ir_result.ir_reported == "no" %}
+                                        <p>No IRs have been annotated on this Genbank file.</p>
+
+                                          {% elif ir_result.ir_reported == "exception" %}
+                                          <p>This file is an exception. Only one or no IRs are present.</p>
+
+                                            {% else %}
+                                            <p>No Genbank file found for {{ accession }}.</p>
+                                              <a href="https://www.ncbi.nlm.nih.gov/nuccore/{{ accession }}"><p>
+                                                Try and download it here.
+                                              </p>
+                                            </a>
+
+                                          {% endif %}
+                                        </div>
+                                      </div>
+
+                                    {% endblock %}

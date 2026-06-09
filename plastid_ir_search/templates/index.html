@@ -1,0 +1,24 @@
+<!-- templates/index.html -->
+{% extends "base.html" %}
+
+{% block title %}Plastid IR Search{% endblock %}
+
+  {% block search %}
+
+    <form method="POST" action="{% url 'search' %}">
+      {% csrf_token %}
+      <div class="input-group">
+        <input class="form-control" type="text" name="search_term" placeholder="Search plant or alga." aria-label="Search">
+        <button class="btn btn-primary px-4" type="submit">
+          <i class="bi bi-search"></i>
+          </button>
+        </div>
+      </form>
+
+      <h5>Start your search.</h5>
+
+        <div class ="container pt-2">
+          {{ plastid_histogram|safe }}
+        </div>
+
+      {% endblock %}

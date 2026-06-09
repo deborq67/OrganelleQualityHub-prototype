@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+  {% block title %}
+    Accessions list for Search {{ search_id }}
+  {% endblock %}
+
+  {% block header %}
+    <br>
+    <a class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#DownloadHistoryModal">Download Accessions</a>
+
+      <div class="modal fade" id="DownloadHistoryModal" tabindex="-1" aria-labelledby="HistoryModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5" id="HistoryModalLabel">Confirmation</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  <p>Are you sure you want to download Accession List?</p>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                      <a href="{% url 'download_accessions' %}?id={{ search_id }}" class="btn btn-primary">Yes</a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              {% endblock %}
+
+              {% block content %}
+
+                <div class="content">
+                  <div class="container">
+                    <a href="{% url 'history' %}" class="btn btn-outline-dark" role="button">Back to History</a>
+                      <br>
+                      <h2 class="mb-2 pt-3">Accessions Found</h2>
+                        <br>
+
+                        {% if history_accessions %}
+                          <div class="row row-cols-6 justify-content-center">
+                            {% for accession in history_accessions %}
+                              <div class="col">
+                                <a href="{% url 'ir_info' accession %}">{{ accession }}</a>
+                                </div>
+                              {% endfor %}
+                            </div>
+                            {% else %}
+                            <p>No Accession IDs were found in this search.</p>
+                            {% endif %}
+
+                          </div>
+                        </div>
+
+                      {% endblock %}

@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+  {% block title %}
+    History
+  {% endblock %}
+
+  {% block header %}
+    <br>
+    <a class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#DownloadHistoryModal">Download History</a>
+
+      <div class="modal fade" id="DownloadHistoryModal" tabindex="-1" aria-labelledby="HistoryModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5" id="HistoryModalLabel">Confirmation</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  <p>Are you sure you want to download History?</p>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                      <a href="{% url 'download_history' %}?download=true" class="btn btn-primary">Yes</a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              {% endblock %}
+
+              {% block content %}
+
+                <div class="content">
+                  <div class="container">
+                    <h2 class="mb-2">Your Search History</h2>
+                      <br>
+
+                      {% if history_records %}
+                        <div class="table-responsive">
+                          <table class="table table-hover">
+                            <thead>
+                              <tr>
+                                <th scope="col">Search Term</th>
+                                  <th scope="col">Records Found</th>
+                                    <th scope="col">Timestamp</th>
+                                      <th scope="col">Accessions Found</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      {% for record in history_records %}
+                                        <tr>
+                                          <td>{{ record.search_term  }}</td>
+                                            <td>{{ record.total_records  }}</td>
+                                              <td>{{ record.searched_at  }}</td>
+                                                <td><a href="{% url 'accession_list' %}?id={{ record.id }}" class="btn btn-outline-dark">View Accessions</a></td>
+                                                </tr>
+                                              {% endfor %}
+                                            </tbody>
+                                          </table>
+                                        </div>
+
+                                        <nav aria-label="Page navigation example">
+                                          <ul class="pagination justify-content-center flex-wrap pt-3">
+                                          <li class="page-item {% if not history_records.has_previous %}disabled{% endif %}">
+                                              {% if history_records.has_previous %}
+                                                <a class="page-link bg-white bg-opacity-25" href="?page={{ history_records.previous_page_number }}">Previous</a>
+                                                  {% else %}
+                                                  <a class="page-link bg-white bg-opacity-25">Previous</a>
+                                                  {% endif %}
+                                                </li>
+                                                {% for num in history_records.paginator.page_range %}
+                                                <li class="page-item {% if history_records.number == num %}active{% endif %}">
+                                                    <a class="page-link bg-white bg-opacity-25" href="?page={{ num }}">{{ num }}</a>
+                                                    </li>
+                                                  {% endfor %}
+                                                <li class="page-item {% if not history_records.has_next %}disabled{% endif %}">
+                                                    {% if history_records.has_next %}
+                                                      <a class="page-link bg-white bg-opacity-25" href="?page={{ history_records.next_page_number }}">Next</a>
+                                                        {% else %}
+                                                        <a class="page-link bg-white bg-opacity-25">Next</a>
+                                                        {% endif %}
+                                                      </li>
+                                                    </ul>
+                                                  </nav>
+
+                                                  {% else %}
+                                                  <p>You have no history.</p>
+                                                  {% endif %}
+
+                                                </div>
+                                              </div>
+
+                                            {% endblock %}

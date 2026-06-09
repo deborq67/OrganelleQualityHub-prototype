@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+  {% block title %}
+    About
+  {% endblock %}
+
+  {% block content %}
+    <div class="content">
+      <div class="container">
+
+        <div class="container border border-dark rounded p-3">
+
+          <h1> Purpose </h1>
+
+            <p>Plastid IR Search is a mini-search engine that searches for complete chloroplast (or plastid) genome records of plants and algae using the
+              NCBI Entrez API for Python. It then compares the IDs, or Accessions, found from these searches with the records you
+              downloaded and processed using the ir_setup command. From there, Plastid IR Search gives you a look at which of those records have inverted repeats
+              (IRs) annotated in them using a series of color-coded symbols.</p>
+
+            </div>
+
+            <br>
+
+            <div class="container border border-dark rounded p-3 w-50">
+              <h1> Symbol Legend </h1>
+                <br>
+
+                <div class="container">
+                  <i class="bi bi-check-circle-fill text-success fs-1"></i>
+                    <div class="container bg-white bg-opacity-25 rounded p-3 py-1 px-2 w-75 mx-auto">
+                      <h6 class="mt-2 w-75 mx-auto">This symbol means 2 inverted repeats (IRs) were annotated in the file. </h6>
+                      </div>
+                    </div>
+
+                    <br>
+
+                    <div class="container">
+                      <i class="bi bi-x-circle-fill text-danger fs-1"></i>
+                        <div class="container bg-white bg-opacity-25 rounded p-3 py-1 px-2 w-75 mx-auto">
+                          <h6 class="mt-2 w-75 mx-auto">This symbol means no inverted repeats (IRs) were annotated in the file.</h6>
+                          </div>
+                        </div>
+
+                        <br>
+
+                        <div class="container">
+                          <i class="bi bi-slash-circle-fill text-info fs-1 mb-5"></i>
+                            <br>
+                            <div class="container bg-white bg-opacity-25 rounded p-3 py-1 px-2 w-75 mx-auto">
+                              <h6 class="mt-2 w-75 mx-auto">This symbol means this record is an exception.
+                                Only 1 inverted repeat was annotated or none occur naturally in the species.</h6>
+                              </div>
+                            </div>
+
+                            <br>
+
+                            <div class="container">
+                              <i class="bi bi-dash-circle-fill text-secondary fs-1"></i>
+                                <div class="container bg-white bg-opacity-25 rounded p-3 py-1 px-2 w-75 mx-auto">
+                                  <h6 class="mt-2 w-75 mx-auto">This symbol means the file associated with the
+                                    accession could not be found. If you click on the hyperlinked accession, you will be redirected to the
+                                    page where you can download the file and run ir_setup on it if you wish.</h6>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <br>
+
+                              <h1>FAQs</h1>
+                                <br>
+                                <h3> What are plastids?</h3>
+                                  <br>
+                                  <p> Almost all multicellular organisms have subunits, or mini-organs in their cells
+                                    which we call organelles. Some of these organelles, such as mitochondria and chloroplasts,
+                                    are believed to have evolved from bacteria billions of years ago and have remnants of their ancestral
+                                    DNA which make up their genome.
+                                  </p>
+                                  <br>
+                                  <p> Plastids are a group of organelles found primarily in plants, algae, and a few other multicellular
+                                    organisms that take many forms. Chloroplasts, the organelles responsible for photosynthesis in these
+                                    organisms, are the most well-known form of plastid.
+                                  </p>
+
+                                  <br>
+
+                                  <h3> What are inverted repeats?</h3>
+                                    <br>
+                                    <p>   Basically, these are two separate
+                                      sections of the genome that are "opposites" (complements) of each other and, when lined up, match each other's
+                                      opposing base. For example, IrA (the first inverted repeat) could look like:
+                                    </p>
+                                    <br>
+                                    <div class="text-center pt-3">
+                                      <code class="text-primary fs-4">GCTTATTCTCTATGCGGGG</code>
+                                      </div>
+                                      <br>
+
+                                      and then IrB would be the same sequence backwards and have its A bases swapped
+                                      with Ts and Cs swapped with Gs (and vice versa) and it will look like:
+
+                                      <div class="text-center pt-3">
+                                        <code class="text-primary fs-4">CCCCGCATAGAGAATAAGC</code>
+                                        </div>
+                                        <br>
+
+
+                                        <h3> This file does have proper inverted repeats so why is it saying there are none found? </h3>
+
+                                          <br>
+
+                                          <p> This program only checks if the IRs were manually annotated in the Genbank record, not
+                                            if the DNA sequence truly has any inverted repeats or not. A good analogy for this is
+                                            it checks if you put your name on the assignment, but not if you actually did the
+                                            assignment itself. </p>
+
+                                            <br>
+
+                                            <h3> Why did these files have to be downloaded and not instead done via the API? </h3>
+
+                                              <br>
+
+                                              <p> NCBI states that their API can only be used at a rate of 3 request per second without an
+                                                API key. If you go any faster than that, your connection could be arbitrarily closed which
+                                                has already happened to me a couple of times. The rate limiting already limits searches to
+                                                take around 10 seconds for 1000 results. If I were to fetch a new file from the API every
+                                                time a search was executed, that would turn into 10 minutes.
+                                              </p>
+
+                                            </div>
+                                          </div>
+
+                                        {% endblock %}
