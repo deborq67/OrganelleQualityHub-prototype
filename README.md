@@ -169,10 +169,10 @@ That folder will represent the root.
 pip install -r requirements.txt
 ```
 
-#### Step 2: Download the Genbank records (in .7z format), and extract it to the plastid_ir_search folder.
+#### Step 2: Download the Genbank records (in .7z format), and extract it to the organellequalityhub_data folder.
 
-NOT in the `PlastidIRSearch` folder (your root). Put the folder on the same level as `manage.py`, you'll see
-why later. As you do so, be sure to also run `cd ./plastid_ir_search` or `cd .\plastid_ir_search` on your terminal (both Windows and Linux).
+NOT in the `OrganelleQualityHub-prototype` folder (your root). Put the folder on the same level as `manage.py`, you'll see
+why later. As you do so, be sure to also run `cd ./organellequalityhub_data` or `cd .\organellequalityhub_data` on your terminal (both Windows and Linux).
 
 [Download the needed folder here.](https://drive.google.com/file/d/1D-JlTBUCT_bMl8UBFwnFtCS_qHYZx6ur/view?usp=drive_link)
 
@@ -214,7 +214,7 @@ Performing system checks...
 
 System check identified no issues (0 silenced).
 May 01, 2026 - 07:58:08
-Django version 6.0.4, using settings 'plastid_ir_search.settings'
+Django version 6.0.4, using settings 'organellequalityhub_config.settings'
 Starting development server at http://127.0.0.1:8000/
 Quit the server with CONTROL-C.
 ```

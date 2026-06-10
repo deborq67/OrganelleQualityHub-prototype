@@ -8,7 +8,7 @@ from django.conf import settings
 # Separate function for parsing needed for multiprocessing to work.
 def parse_file(filepath):
     import django
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'plastid_ir_search.settings')
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'organellequalityhub_config.settings')
     django.setup()
     from genbank_interaction.ir_operations import IROperations
     try:
@@ -31,10 +31,10 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        genbank_dir = os.path.join(settings.BASE_DIR, 'genbank_files')
+        genbank_dir = os.path.join(settings.BASE_DIR, 'plastid_files')
         if not os.path.exists(genbank_dir):
             raise CommandError(
-                'The "genbank_files" directory can not be found. '
+                'The "plastid_files" directory can not be found. '
                 'Make sure it is on the same level as manage.py.'
             )
 
@@ -55,7 +55,7 @@ class Command(BaseCommand):
             ]
             if not file_list:
                 raise CommandError(
-                    'No .gb files found in the "genbank_files" directory.'
+                    'No .gb files found in the "plastid_files" directory.'
                 )
         self.stdout.write(f'{len(file_list)} new files to process.')
         self.stdout.write('Processing...')

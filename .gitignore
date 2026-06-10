@@ -206,7 +206,7 @@ marimo/_static/
 marimo/_lsp/
 __marimo__/
 
-/plastid_ir_search/genbank_files
+/organellequalityhub_data/plastid_files
 
-plastid_ir_search/genbank_interaction/migrations/0001_initial.py
-plastid_ir_search/search_function/migrations/0001_initial.py
+organellequalityhub_data/genbank_interaction/migrations/0001_initial.py
+organellequalityhub_data/search_function/migrations/0001_initial.py

@@ -6,16 +6,13 @@ from datetime import datetime, date
 import polars as pl
 from django.http import HttpResponse
 import plotly.express as px
-from django_pandas.io import read_frame
 from django.core.paginator import (Paginator, EmptyPage, PageNotAnInteger)
 
 
 def index(request):
     # This whole part is to render a html graph.
-    histogram_qs = IR_Identification.objects.all()
-    histogram_df = read_frame(histogram_qs, fieldnames=['updated', 'accession', 'ir_reported'])
-
-    histogram_df = pl.from_pandas(histogram_df)
+    records = list(IR_Identification.objects.values('updated', 'accession', 'ir_reported'))
+    histogram_df = pl.DataFrame(records) if records else pl.DataFrame(schema={'updated': pl.Date, 'accession': pl.String, 'ir_reported': pl.String})
 
     histogram_df = histogram_df.filter(pl.col('updated').is_not_null())
     histogram_df = histogram_df.filter(pl.col('ir_reported') == 'Yes')
@@ -83,7 +80,7 @@ def search(request):
             'results': [],
             'total_records': 0,
             })
-        
+
         # Sort by most recently updates THEN turn to a dictionary for model purposes.
         search_dict = search_query.sort(
             'Updated',
@@ -203,23 +200,10 @@ def accession_list(request):
 
 
 def download_results(request):
-    # Django-Pandas is great at turning the df into a Pandas df since there
-    # isn't really a good Polars equivalent. From there I can convert to
-    # Polars and do the rest.
-    searchresult_qs = SearchResult.objects.all()
-    df = read_frame(
-        searchresult_qs,
-        fieldnames=[
-            'accession',
-            'title',
-            'bp_length',
-            'updated',
-            'created',
-            'ir_info__ir_reported'
-        ]
-    )
+    df = pl.DataFrame(list(SearchResult.objects.values(
+        'accession', 'title', 'bp_length', 'updated', 'created', 'ir_info__ir_reported'
+    )))
     #Main thing here is formatting the time.
-    df = pl.from_pandas(df)
     df = df.with_columns(pl.col('updated').dt.strftime('%Y-%m-%d'))
     df = df.with_columns(pl.col('created').dt.strftime('%Y-%m-%d'))
     #Make rows human-readable.
@@ -235,7 +219,7 @@ def download_results(request):
     )
     response = HttpResponse(df.write_csv(), content_type='text/csv')
     response['Content-Disposition'] = (
-        'attachment; filename="plastid_ir_search_results.csv"'
+        'attachment; filename="organellequalityhub_data_results.csv"'
     )
     return response
 
@@ -243,14 +227,9 @@ def download_results(request):
 def download_history(request):
     # Same logic as download_results, but for the history page.
 
-    searchhistory_qs = SearchHistory.objects.filter(
+    df = pl.DataFrame(list(SearchHistory.objects.filter(
         session_key=request.session.session_key
-    )
-    df = read_frame(
-        searchhistory_qs,
-        fieldnames=['search_term', 'total_records', 'searched_at']
-    )
-    df = pl.from_pandas(df)
+    ).values('search_term', 'total_records', 'searched_at')))
     df = df.with_columns(pl.col('searched_at').cast(pl.Datetime).dt.strftime('%Y-%m-%d %H:%M:%S'))
     df = df.rename(
         {
@@ -261,7 +240,7 @@ def download_history(request):
     )
     response = HttpResponse(df.write_csv(), content_type='text/csv')
     response['Content-Disposition'] = (
-        'attachment; filename="plastid_ir_search_history.csv"'
+        'attachment; filename="organellequalityhub_data_history.csv"'
     )
     return response
 
@@ -270,12 +249,9 @@ def download_accessions(request):
     # Same logic as download_results, but for the accession records.
 
     search_id = request.GET.get('id')
-    searchhistory_qs = SearchHistory.objects.all()
-    history_accession_df = read_frame(
-        searchhistory_qs,
-        fieldnames=['id', 'search_accessions']
+    history_accession_df = pl.DataFrame(
+        list(SearchHistory.objects.values('id', 'search_accessions'))
     )
-    history_accession_df = pl.from_pandas(history_accession_df)
     history_accession_df = (
         history_accession_df
         # Splits the comma-separated accessions into a list and then explodes for one accession per row.
@@ -286,9 +262,9 @@ def download_accessions(request):
     )
     history_accession_df = history_accession_df.rename({'search_accessions': 'accession'})
 
-    ir_info_qs = IR_Identification.objects.all()
-    ir_info_df = read_frame(ir_info_qs, fieldnames=['accession', 'ir_reported'])
-    ir_info_df = pl.from_pandas(ir_info_df)
+    ir_info_df = pl.DataFrame(
+        list(IR_Identification.objects.values('accession', 'ir_reported'))
+    )
     final_df = (
         history_accession_df
         .filter(pl.col('id') == int(search_id))

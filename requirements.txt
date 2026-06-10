@@ -6,7 +6,6 @@ colorama==0.4.6
 diff-match-patch==20241021
 Django==6.0.4
 django-import-export==4.4.0
-django-pandas==0.6.7
 django-unfold==0.90.0
 fsspec==2026.3.0
 locket==1.0.0

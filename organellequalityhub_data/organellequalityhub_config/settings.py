@@ -48,7 +48,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'plastid_ir_search.urls'
+ROOT_URLCONF = 'organellequalityhub_config.urls'
 
 TEMPLATES = [
     {
@@ -65,7 +65,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'plastid_ir_search.wsgi.application'
+WSGI_APPLICATION = 'organellequalityhub_config.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
@@ -145,4 +145,4 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-GENBANK_DIR = os.path.join(BASE_DIR, "genbank_interaction", "genbank_files")
+GENBANK_DIR = os.path.join(BASE_DIR, "genbank_interaction", "plastid_files")

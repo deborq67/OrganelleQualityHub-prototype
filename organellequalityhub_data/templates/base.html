@@ -7,11 +7,15 @@
       <meta name="viewport" content="width=device-width, initial-scale=1">
       <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
       <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
-      <link rel="icon" type="image/svg+xml" href="{% static 'favicon.svg' %}">
-      <link rel="apple-touch-icon" href="{% static 'favicon.svg' %}">
+      <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
+      <link rel="icon" type="image/svg+xml" href="{% static 'Mitochondria.svg' %}">
+      <link rel="apple-touch-icon" href="{% static 'Mitochondria.svg' %}">
       <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
         <script src="https://cdn.plot.ly/plotly-3.5.0.min.js" charset="utf-8"></script>
           <style>
+            body {
+            font-family: 'Patrick Hand', cursive;
+            }
             .table td,
             .table th,
             .table tbody,
@@ -80,7 +84,7 @@
 
                         <div class="rounded-3 text-center pt-2" style="background: linear-gradient(#E3F70C, #318A11);">
                           <a href={% url "index" %}>
-                            <img class="img-fluid mx-auto d-block" src="{% static 'PlastidIRSearch.png' %}" style="padding: 10px;">
+                            <img class="img-fluid mx-auto d-block" src="{% static 'OrganelleQualityHubLogo.svg' %}" style="padding: 10px;">
                           </a>
 
                           {% block header %}
