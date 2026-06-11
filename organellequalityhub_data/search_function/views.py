@@ -10,31 +10,37 @@ from django.core.paginator import (Paginator, EmptyPage, PageNotAnInteger)
 
 
 def index(request):
+    
     # This whole part is to render a html graph.
-    records = list(IR_Identification.objects.values('updated', 'accession', 'ir_reported'))
-    histogram_df = pl.DataFrame(records) if records else pl.DataFrame(schema={'updated': pl.Date, 'accession': pl.String, 'ir_reported': pl.String})
+    records = list(IR_Identification.objects.values('updated', 'accession'))
+    histogram_df = pl.DataFrame(records) if records else pl.DataFrame(schema={'updated': pl.Date, 'accession': pl.String})
 
     histogram_df = histogram_df.filter(pl.col('updated').is_not_null())
-    histogram_df = histogram_df.filter(pl.col('ir_reported') == 'Yes')
-    histogram_df = histogram_df.drop('ir_reported')
 
     histogram_df = histogram_df.with_columns(pl.col('updated').cast(pl.Date))
-    histogram_df = histogram_df.rename(
-        {'accession': 'Accession IDs', 'updated': 'Last Update'}
+    histogram_df = histogram_df.group_by('updated').agg(pl.len().alias('count')).sort('updated')
+    full_range = pl.DataFrame({'updated': pl.date_range(histogram_df['updated'].min(), histogram_df['updated'].max(), '1d', eager=True)})
+    histogram_df = (
+        full_range
+        .join(histogram_df, on='updated', how='left')
+        .fill_null(0)
+        .with_columns(pl.col('count').cum_sum().alias('Total Records'))
+        .rename({'updated': 'Last Update'})
     )
 
-    plastid_histogram = px.histogram(
+    plastid_histogram = px.bar(
         histogram_df,
         x='Last Update',
+        y='Total Records',
         title='Total Annotated Plastid Records Uploaded to GenBank Over Time',
         template='none'
     )
-
     plastid_histogram.update_layout(
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
         xaxis=dict(range=['2015-01-01', date.today().isoformat()]),
         yaxis=dict(rangemode='nonnegative', title="Records"),
+        font=dict(family='Patrick Hand, cursive'),
     )
 
     plastid_histogram = plastid_histogram.to_html(

@@ -7,6 +7,7 @@ diff-match-patch==20241021
 Django==6.0.4
 django-import-export==4.4.0
 django-unfold==0.90.0
+django-pandas==0.6.7
 fsspec==2026.3.0
 locket==1.0.0
 narwhals==2.20.0
@@ -17,6 +18,7 @@ partd==1.4.2
 plotly==6.7.0
 polars==1.40.1
 polars-runtime-32==1.40.1
+psycopg2-binary==2.9.12
 pyarrow==24.0.0
 python-dateutil==2.9.0.post0
 PyYAML==6.0.3

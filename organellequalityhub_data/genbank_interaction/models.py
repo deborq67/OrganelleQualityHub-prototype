@@ -72,4 +72,5 @@ class IR_Identification(models.Model):
 
     class Meta:
         verbose_name = "IR Identification"
+        db_table = "plastid_interaction_ir_identification"
 
