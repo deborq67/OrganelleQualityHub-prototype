@@ -38,6 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'search_function',
     'genbank_interaction',
+    'genome_map',
+    'organism_metadata',
     'django_pandas',
 ]
 
@@ -75,14 +77,20 @@ WSGI_APPLICATION = 'organellequalityhub_config.wsgi.application'
 
 DATABASES = {
     'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    },
+    'supabase': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
+        'NAME': os.getenv('DB_NAME', 'postgres'),
         'USER': os.getenv('DB_USER', 'postgres'),
         'PASSWORD': os.getenv('DB_PASSWORD'),
         'HOST': os.getenv('DB_HOST'),
-        'PORT': '5432',
+        'PORT': os.getenv('DB_PORT', '5432'),
     }
 }
+
+DATABASE_ROUTERS = ['organellequalityhub_config.routers.SupabaseRouter']
 
 
 # Password validation
