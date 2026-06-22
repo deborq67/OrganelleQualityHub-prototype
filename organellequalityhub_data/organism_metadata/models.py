@@ -43,6 +43,9 @@ class TaxonomyData(models.Model):
 
 class OrganelleMetadata(models.Model):
     accession = models.CharField(max_length=50, unique=True)
+    title = models.TextField(null=True, blank=True)
+    base_pair_length = models.IntegerField(verbose_name='Base Pair Length', null=True, blank=True)
+    updated = models.DateTimeField(verbose_name='Last Updated', null=True, blank=True)
     r_rnas_reported = models.IntegerField(verbose_name='rRNAs Reported', null=True, blank=True)
     t_rnas_reported = models.IntegerField(verbose_name='tRNAs Reported', null=True, blank=True)
     gene_count = models.IntegerField(verbose_name='Total Genes Present', null=True, blank=True)

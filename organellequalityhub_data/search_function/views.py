@@ -2,7 +2,8 @@ from django.shortcuts import render, redirect
 from .plastid_search_function import initiate_search
 from .models import SearchResult, SearchHistory
 from genbank_interaction.models import IR_Identification
-from datetime import datetime, date
+from organism_metadata.models import OrganelleMetadata
+from datetime import date
 import polars as pl
 from django.http import HttpResponse
 import plotly.express as px
@@ -114,15 +115,6 @@ def search(request):
             result = SearchResult.objects.create(
                 accession=record['Accession'],
                 title=record['Title'],
-                bp_length=record['BP_Length'],
-                updated=datetime.strptime(
-                    record['Updated'],
-                    '%Y/%m/%d'
-                ) if record['Updated'] else None,
-                created=datetime.strptime(
-                    record['Created'],
-                    '%Y/%m/%d'
-                ) if record['Created'] else None,
                 ir_info=ir_result,
             )
             result_instances.append(result)
@@ -206,12 +198,23 @@ def accession_list(request):
 
 
 def download_results(request):
-    df = pl.DataFrame(list(SearchResult.objects.values(
-        'accession', 'title', 'bp_length', 'updated', 'created', 'ir_info__ir_reported'
-    )))
-    #Main thing here is formatting the time.
-    df = df.with_columns(pl.col('updated').dt.strftime('%Y-%m-%d'))
-    df = df.with_columns(pl.col('created').dt.strftime('%Y-%m-%d'))
+    results = list(SearchResult.objects.values('accession', 'title', 'ir_info__ir_reported'))
+
+    metadata_by_accession = {
+        metadata.accession: metadata
+        for metadata in OrganelleMetadata.objects.filter(
+            accession__in=[result['accession'] for result in results]
+        )
+    }
+    for result in results:
+        metadata = metadata_by_accession.get(result['accession'])
+        result['bp_length'] = metadata.base_pair_length if metadata else None
+        result['updated'] = metadata.updated if metadata else None
+
+    df = pl.DataFrame(results)
+    #Main thing here is formatting the time. Cast first since the column may be
+    #entirely null, which would otherwise infer a Null dtype with no .dt accessor.
+    df = df.with_columns(pl.col('updated').cast(pl.Datetime).dt.strftime('%Y-%m-%d'))
     #Make rows human-readable.
     df = df.rename(
         {
@@ -219,7 +222,6 @@ def download_results(request):
             'title': 'Title',
             'bp_length': 'Base_Pair_Length',
             'updated': 'Updated',
-            'created': 'Created',
             'ir_info__ir_reported': 'IRs_Reported'
         }
     )

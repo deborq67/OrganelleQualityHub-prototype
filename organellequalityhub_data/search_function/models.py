@@ -4,9 +4,6 @@ from django.db import models
 class SearchResult(models.Model):
     accession = models.CharField(max_length=50)
     title = models.TextField()
-    bp_length = models.IntegerField()
-    updated = models.DateTimeField(null=True, blank=True)
-    created = models.DateTimeField(null=True, blank=True)
     ir_info = models.ForeignKey(
         'genbank_interaction.IR_Identification',
         to_field='accession',

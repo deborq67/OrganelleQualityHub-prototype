@@ -60,7 +60,6 @@
                                           <th scope="col">Title</th>
                                             <th scope="col">Base Pair Length</th>
                                               <th scope="col">Updated</th>
-                                                <th scope="col">Created</th>
                                                   <th scope="col">IR Reported in Record File?</th>
                                                   </tr>
                                                 </thead>
@@ -69,9 +68,8 @@
                                                     <tr>
                                                       <td><a href="{% url 'ir_info' result.Accession %}">{{ result.Accession }}</a></td>
                                                         <td>{{ result.Title }}</td>
-                                                          <td>{{ result.BP_Length }}</td>
-                                                            <td>{{ result.Updated }}</td>
-                                                              <td>{{ result.Created }}</td>
+                                                          <td>{{ result.BP_Length|default_if_none:"" }}</td>
+                                                            <td>{{ result.Updated|default_if_none:"" }}</td>
 
                                                                 {% if result.ir_reported == "yes" %}
                                                                   <td><i class="bi bi-check-circle-fill text-success"></i></td>

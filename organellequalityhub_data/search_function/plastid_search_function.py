@@ -1,22 +1,33 @@
-from Bio import Entrez
 import polars as pl
-import time
 from django.core.cache import cache
+from django.db.models import Q
+
+from organism_metadata.models import TaxonomyData, OrganelleMetadata
 
 '''
-Purpose: This script only fetches basic information on an organism from Genbank.
-It will work in conjunction with a local Genbank database to parse using said information.
+Purpose: Searches the locally stored taxonomy records for organisms matching
+the search term, then joins in title, base pair length, and last updated
+from OrganelleMetadata by accession.
 '''
+
+# Taxonomic fields to match each search term token against.
+TAXONOMY_SEARCH_FIELDS = [
+    'common_name', 'superkingdom', 'kingdom', 'phylum',
+    'tax_class', 'order', 'family', 'genus', 'species', 'subspecies',
+]
+
+EMPTY_SCHEMA = {
+    'Accession': pl.String,
+    'Title': pl.String,
+    'BP_Length': pl.Int64,
+    'Updated': pl.String,
+}
 
 
 def initiate_search(search_term):
-    # Email is a requirement by NCBI, the API provider.
-
-    Entrez.email = "johnsmith@example.com"
-
-    query = (f'"{search_term}"[Organism]' +
-             ' AND ((chloroplast[filter] OR plastid[filter]) AND "complete genome"[Title])'
-             )
+    search_term = search_term.strip()
+    if not search_term:
+        return pl.DataFrame(schema=EMPTY_SCHEMA), 0
 
     # Cache the result to save on speed.
 
@@ -24,42 +35,39 @@ def initiate_search(search_term):
     if cached:
         return cached
 
-    # Entrez.esearch fetches IDs necessary to get record title and DNA sequence.
+    # Every token in the search term must match at least one taxonomic
+    # field, e.g. "Arabidopsis thaliana" matches genus="Arabidopsis" AND
+    # species="thaliana".
 
-    handle = Entrez.esearch(db="nuccore", term=query, retmax=10000)
-    record = Entrez.read(handle)
-    handle.close()
+    matches = TaxonomyData.objects.all()
+    for token in search_term.split():
+        token_filter = Q()
+        for field in TAXONOMY_SEARCH_FIELDS:
+            token_filter |= Q(**{f'{field}__icontains': token})
+        matches = matches.filter(token_filter)
 
-    total_records = int(record['Count'])
+    accessions = list(matches.values_list('accession', flat=True))
+    total_records = len(accessions)
 
-    # Get IDs needed for look up records.
-
-    id_list = record["IdList"]
-
-    # These lines get records in batches of 500 and have a delay to keep the API from
-    # closing its connection; which has already happened to me a few times.
+    metadata_by_accession = {
+        metadata.accession: metadata
+        for metadata in OrganelleMetadata.objects.filter(accession__in=accessions)
+    }
 
     records = []
-    batch_size = 500
-    for i in range(0, len(id_list), batch_size):
-        batch = id_list[i:i + batch_size]
-        handle = Entrez.esummary(db="nuccore", id=",".join(batch), retmax=batch_size)
-        summaries = Entrez.read(handle)
-        handle.close()
-        time.sleep(0.34)
+    for accession in accessions:
+        metadata = metadata_by_accession.get(accession)
+        records.append({
+            'Accession': accession,
+            'Title': metadata.title if metadata and metadata.title else 'No Title',
+            'BP_Length': metadata.base_pair_length if metadata else None,
+            'Updated': (
+                metadata.updated.strftime('%Y/%m/%d')
+                if metadata and metadata.updated else None
+            ),
+        })
 
-        # Get records and place in a dataframe.
-
-        for summary in summaries:
-            records.append({
-                "Accession": summary['AccessionVersion'],
-                "Title": summary['Title'],
-                "BP_Length": int(summary['Length']),
-                "Updated": summary['UpdateDate'],
-                "Created": summary['CreateDate'],
-            })
-
-    df = pl.DataFrame(records)
+    df = pl.DataFrame(records) if records else pl.DataFrame(schema=EMPTY_SCHEMA)
 
     # Cache records if already searched.
     cache.set(search_term, (df, total_records))
