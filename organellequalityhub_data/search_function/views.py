@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from .plastid_search_function import initiate_search
+from .accessions import attach_ir_status
 from .models import SearchResult, SearchHistory
 from genbank_interaction.models import IR_Identification
 from organism_metadata.models import OrganelleMetadata
@@ -8,6 +9,29 @@ import polars as pl
 from django.http import HttpResponse
 import plotly.express as px
 from django.core.paginator import (Paginator, EmptyPage, PageNotAnInteger)
+
+
+def get_page_range(paginator, current_page, max_pages=6):
+    ''' Caps the number of page shown to 6. Once there are more pages than
+     6, the leading block follows the current page (e.g. on page 4:
+     2 3 4 ... 18 19 20), while the trailing block stays anchored to the
+     last page. Once the leading block would close in on the trailing one,
+     show as continuous instead of a ...'''
+    total_pages = paginator.num_pages
+    if total_pages <= max_pages:
+        return list(range(1, total_pages + 1))
+
+    edge = max_pages // 2
+
+    if current_page >= total_pages - max_pages + 1:
+        left_start = max(1, total_pages - max_pages + 1)
+        return list(range(left_start, total_pages + 1))
+
+    left_end = max(edge, current_page)
+    left_block = list(range(left_end - edge + 1, left_end + 1))
+    right_block = list(range(total_pages - edge + 1, total_pages + 1))
+
+    return left_block + [None] + right_block
 
 
 def index(request):
@@ -105,23 +129,13 @@ def search(request):
             )
         )
 
-        # Make a dictionary of dictionaries
-        result_instances = []
-
-        for record in search_dict:
-            ir_result = IR_Identification.objects.filter(
-                accession=record['Accession']
-            ).first()
-            result = SearchResult.objects.create(
+        SearchResult.objects.bulk_create([
+            SearchResult(
                 accession=record['Accession'],
                 title=record['Title'],
-                ir_info=ir_result,
             )
-            result_instances.append(result)
-            if ir_result:
-                record['ir_reported'] = ir_result.ir_reported
-            else:
-                record['ir_reported'] = 'n/a'
+            for record in search_dict
+        ])
 
         # Save history.
         history_record.save()
@@ -153,6 +167,7 @@ def search(request):
         'search_term': search_term,
         'results': results_page,
         'total_records': total_records,
+        'page_range': get_page_range(paginator, results_page.number),
     })
 
 
@@ -174,7 +189,10 @@ def history(request):
     except EmptyPage:
         results_page = paginator.page(paginator.num_pages)
 
-    return render(request, 'search_function/history.html', {'history_records': results_page})
+    return render(request, 'search_function/history.html', {
+        'history_records': results_page,
+        'page_range': get_page_range(paginator, results_page.number),
+    })
 
 
 # This extracts a list of Accession numbers for a separate page.
@@ -187,6 +205,7 @@ def accession_list(request):
     #Prevents crash if there are no accessions. Also sorts the accessions alphabetically.
     history_accessions = [accession for accession in history_accessions if accession]
     history_accessions.sort()
+    history_accessions = attach_ir_status(history_accessions)
     return render(
         request,
         'search_function/accessions.html',
@@ -198,7 +217,7 @@ def accession_list(request):
 
 
 def download_results(request):
-    results = list(SearchResult.objects.values('accession', 'title', 'ir_info__ir_reported'))
+    results = list(SearchResult.objects.values('accession', 'title'))
 
     metadata_by_accession = {
         metadata.accession: metadata
@@ -210,6 +229,7 @@ def download_results(request):
         metadata = metadata_by_accession.get(result['accession'])
         result['bp_length'] = metadata.base_pair_length if metadata else None
         result['updated'] = metadata.updated if metadata else None
+        result['ambiguity_content'] = metadata.ambiguity_content if metadata else None
 
     df = pl.DataFrame(results)
     #Main thing here is formatting the time. Cast first since the column may be
@@ -222,7 +242,7 @@ def download_results(request):
             'title': 'Title',
             'bp_length': 'Base_Pair_Length',
             'updated': 'Updated',
-            'ir_info__ir_reported': 'IRs_Reported'
+            'ambiguity_content': 'Ambiguity_Content',
         }
     )
     response = HttpResponse(df.write_csv(), content_type='text/csv')
