@@ -1,6 +1,6 @@
 from django.contrib import admin
 from unfold.admin import ModelAdmin
-from .models import IR_Identification, IR_Confirmation
+from .models import IR_Identification
 from django.forms import DateInput
 from django import forms
 
@@ -38,10 +38,3 @@ class IRCalculationAdmin(ModelAdmin):
     def updated_date(self, obj):
         return obj.updated.strftime('%B %d, %Y') if obj.updated else None
     updated_date.short_description = "Last Updated"
-
-
-@admin.register(IR_Confirmation)
-class IRConfirmationAdmin(ModelAdmin):
-    list_display = ["accession", "ira_blastinferred", "irb_blastinferred"]
-    list_filter = ["ira_blastinferred", "irb_blastinferred"]
-    search_fields = ["accession"]

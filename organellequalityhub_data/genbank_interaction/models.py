@@ -67,22 +67,6 @@ class IR_Identification(models.Model):
         blank=True,
         verbose_name="Length of Inverted Repeat B (bp)"
     )
-
-    def __str__(self):
-        return f"{self.accession} - {self.title} - {self.updated}"
-
-    class Meta:
-        verbose_name = "IR Identification"
-        db_table = "plastid_interaction_ir_identification"
-
-
-class IR_Confirmation(models.Model):
-    IRB_CHOICES = [
-        ("yes", "Yes"),
-        ("no", "No"),
-    ]
-
-    accession = models.CharField(max_length=50, unique=True)
     ira_blastinferred = models.CharField(max_length=10, choices=IRB_CHOICES, default="no")
     ira_blastinferred_start = models.IntegerField(
         null=True,
@@ -118,9 +102,9 @@ class IR_Confirmation(models.Model):
     notes = models.TextField(null=True, blank=True)
 
     def __str__(self):
-        return f"{self.accession} — IRa: {self.ira_blastinferred_length}, IRb: {self.irb_blastinferred_length}"
+        return f"{self.accession} - {self.title} - {self.updated}"
 
     class Meta:
-        verbose_name = "IR Confirmation"
-        db_table = "plastid_interaction_ir_confirmation"
+        verbose_name = "IR Identification"
+        db_table = "plastid_interaction_ir_identification"
 

@@ -4,14 +4,6 @@ from django.db import models
 class SearchResult(models.Model):
     accession = models.CharField(max_length=50)
     title = models.TextField()
-    ir_info = models.ForeignKey(
-        'genbank_interaction.IR_Identification',
-        to_field='accession',
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name='search_results'
-    )
 
     def __str__(self):
         return f"{self.accession}"
