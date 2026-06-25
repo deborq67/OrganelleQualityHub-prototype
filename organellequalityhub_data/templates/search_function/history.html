@@ -68,10 +68,14 @@
                                                   <a class="page-link bg-white bg-opacity-25">Previous</a>
                                                   {% endif %}
                                                 </li>
-                                                {% for num in history_records.paginator.page_range %}
+                                                {% for num in page_range %}
+                                                {% if num %}
                                                 <li class="page-item {% if history_records.number == num %}active{% endif %}">
                                                     <a class="page-link bg-white bg-opacity-25" href="?page={{ num }}">{{ num }}</a>
                                                     </li>
+                                                {% else %}
+                                                <li class="page-item disabled"><span class="page-link bg-white bg-opacity-25">...</span></li>
+                                                {% endif %}
                                                   {% endfor %}
                                                 <li class="page-item {% if not history_records.has_next %}disabled{% endif %}">
                                                     {% if history_records.has_next %}

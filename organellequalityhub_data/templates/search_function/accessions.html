@@ -39,9 +39,18 @@
 
                         {% if history_accessions %}
                           <div class="row row-cols-6 justify-content-center">
-                            {% for accession in history_accessions %}
+                            {% for item in history_accessions %}
                               <div class="col">
-                                <a href="{% url 'ir_info' accession %}">{{ accession }}</a>
+                                <a href="{% url 'ir_info' item.accession %}">{{ item.accession }}</a>
+                                {% if item.ir_reported == "yes" %}
+                                  <i class="bi bi-check-circle-fill text-success"></i>
+                                {% elif item.ir_reported == "no" %}
+                                  <i class="bi bi-x-circle-fill text-danger"></i>
+                                {% elif item.ir_reported == "exception" %}
+                                  <i class="bi bi-slash-circle-fill text-info"></i>
+                                {% else %}
+                                  <i class="bi bi-dash-circle-fill text-secondary"></i>
+                                {% endif %}
                                 </div>
                               {% endfor %}
                             </div>

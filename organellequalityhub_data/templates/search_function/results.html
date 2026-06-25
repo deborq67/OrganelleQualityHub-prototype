@@ -22,11 +22,19 @@
                       </div>
                       <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                          <a href="{% url 'download_results' %}?download=true" class="btn btn-primary">Yes</a>
+                          <button type="button" class="btn btn-primary js-confirm-download" data-download-url="{% url 'download_results' %}?download=true" data-bs-dismiss="modal">Yes</button>
                           </div>
                         </div>
                       </div>
                     </div>
+
+                    <script>
+                      document.querySelectorAll('.js-confirm-download').forEach(function (button) {
+                        button.addEventListener('click', function () {
+                          window.location.href = button.dataset.downloadUrl;
+                        });
+                      });
+                    </script>
 
                     <div class="container">
                       <div class="row justify-content-center align-items-center">
@@ -60,7 +68,7 @@
                                           <th scope="col">Title</th>
                                             <th scope="col">Base Pair Length</th>
                                               <th scope="col">Updated</th>
-                                                  <th scope="col">IR Reported in Record File?</th>
+                                                <th scope="col">Ambiguity Content</th>
                                                   </tr>
                                                 </thead>
                                                 <tbody>
@@ -70,27 +78,18 @@
                                                         <td>{{ result.Title }}</td>
                                                           <td>{{ result.BP_Length|default_if_none:"" }}</td>
                                                             <td>{{ result.Updated|default_if_none:"" }}</td>
-
-                                                                {% if result.ir_reported == "yes" %}
-                                                                  <td><i class="bi bi-check-circle-fill text-success"></i></td>
-
-                                                                    {% elif result.ir_reported == "no" %}
-                                                                    <td><i class="bi bi-x-circle-fill text-danger"></i></td>
-
-                                                                      {% elif result.ir_reported == "exception" %}
-                                                                      <td><i class="bi bi-slash-circle-fill text-info"></i></td>
-
-                                                                        {% else %}
-                                                                        <td><i class="bi bi-dash-circle-fill text-secondary"></i></td>
-
-                                                                        {% endif %}
-                                                                      </tr>
+                                                              <td>{% if result.Ambiguity_Content != None %}{{ result.Ambiguity_Content }}%{% endif %}</td>
+                                                                    </tr>
                                                                     {% endfor %}
                                                                   </tbody>
                                                                 </table>
                                                               </div>
                                                             </div>
                                                           </div>
+
+                                                          {% comment %}
+                                                            This next section is a retry.
+                                                          {% endcomment %}
 
                                                           {% comment %}
                                                             This next section for pagination. Makes navigating through tables less cumbersome.
@@ -105,10 +104,14 @@
                                                                     <a class="page-link bg-white bg-opacity-25">Previous</a>
                                                                     {% endif %}
                                                                   </li>
-                                                                  {% for num in results.paginator.page_range %}
+                                                                  {% for num in page_range %}
+                                                                  {% if num %}
                                                                   <li class="page-item {% if results.number == num %}active{% endif %}">
                                                                       <a class="page-link bg-white bg-opacity-25" href="?page={{ num }}">{{ num }}</a>
                                                                       </li>
+                                                                  {% else %}
+                                                                  <li class="page-item disabled"><span class="page-link bg-white bg-opacity-25">...</span></li>
+                                                                  {% endif %}
                                                                     {% endfor %}
                                                                   <li class="page-item {% if not results.has_next %}disabled{% endif %}">
                                                                       {% if results.has_next %}
