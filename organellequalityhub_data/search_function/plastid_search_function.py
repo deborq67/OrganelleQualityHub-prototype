@@ -1,3 +1,5 @@
+import hashlib
+
 import polars as pl
 from django.core.cache import cache
 from django.db.models import Q
@@ -21,6 +23,7 @@ EMPTY_SCHEMA = {
     'Title': pl.String,
     'BP_Length': pl.Int64,
     'Updated': pl.String,
+    'Ambiguity_Content': pl.Float64,
 }
 
 
@@ -30,8 +33,10 @@ def initiate_search(search_term):
         return pl.DataFrame(schema=EMPTY_SCHEMA), 0
 
     # Cache the result to save on speed.
+    
+    cache_key = 'search:' + hashlib.md5(search_term.encode()).hexdigest()
 
-    cached = cache.get(search_term)
+    cached = cache.get(cache_key)
     if cached:
         return cached
 
@@ -65,11 +70,12 @@ def initiate_search(search_term):
                 metadata.updated.strftime('%Y/%m/%d')
                 if metadata and metadata.updated else None
             ),
+            'Ambiguity_Content': metadata.ambiguity_content if metadata else None,
         })
 
     df = pl.DataFrame(records) if records else pl.DataFrame(schema=EMPTY_SCHEMA)
 
     # Cache records if already searched.
-    cache.set(search_term, (df, total_records))
+    cache.set(cache_key, (df, total_records))
 
     return df, total_records

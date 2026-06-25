@@ -1,14 +1,15 @@
 <!-- templates/index.html -->
 {% extends "base.html" %}
+{% load static %}
 
-{% block title %}Plastid IR Search{% endblock %}
+{% block title %}Organelle Quality Hub{% endblock %}
 
   {% block search %}
 
     <form method="POST" action="{% url 'search' %}">
       {% csrf_token %}
       <div class="input-group">
-        <input class="form-control" type="text" name="search_term" placeholder="Search plant or alga." aria-label="Search">
+        <input class="form-control" type="text" name="search_term" placeholder="Search organelle." aria-label="Search">
         <button class="btn btn-primary px-4" type="submit">
           <i class="bi bi-search"></i>
           </button>
@@ -20,5 +21,35 @@
         <div class ="container pt-2">
           {{ plastid_histogram|safe }}
         </div>
+
+            <div class="d-flex align-items-start justify-content-center">
+    <div class="organelle_box_home">
+      <img src="{% static 'Mitochondria.svg' %}" class="rounded">
+    </div>
+    <div class="mainindent ms-3">
+      <h3>Mitochondria</h3>
+      <p>
+        <a href="">Search All Records</a> Look for all mitochondrial records.<br>
+        <a href="">Human Records</a> Look for all human mitochondrial records.<br>
+        <a href="">Random Record</a> Search for a random mitochondrial record.<br>
+        <br>
+      </p>
+    </div>
+  </div>
+
+  <div class="d-flex align-items-start justify-content-center">
+    <div class="organelle_box_home">
+      <img src="{% static 'Chloroplast.svg' %}" class="rounded">
+    </div>
+    <div class="mainindent ms-3">
+      <h3>Chroloplasts & Other Plastids</h3>
+      <p>
+        <a href="">Search All Records</a> Look for all chloroplast and other plastid records.<br>
+        <a href="">IR Reported</a> Look for records that have 2 inverted repeats annotated.<br>
+        <a href="">Random Record</a> Search for a random chloroplast record.<br>
+        <br>
+      </p>
+    </div>
+  </div>
 
       {% endblock %}
