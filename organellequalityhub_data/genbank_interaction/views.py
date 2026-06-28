@@ -14,7 +14,7 @@ def ir_info(request, accession):
 
     return render(
         request,
-        'genbank_interaction/info.html',
+        'genbank_interaction/ir_info.html',
         {
             'ir_result': ir_result,
             'search_result': search_result,

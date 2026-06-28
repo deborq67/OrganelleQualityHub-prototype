@@ -61,45 +61,42 @@ def initiate_search(search_term, category='Genus & Species'):
 
     words = search_term.split()
     if category == 'Gene':
-        matches = OrganelleMetadata.objects.all()
+        metadata_query = OrganelleMetadata.objects.all()
         for word in words:
-            matches = matches.filter(gene_list__icontains=word)
+            metadata_query = metadata_query.filter(gene_list__icontains=word)
     else:
-        matches = TaxonomyData.objects.all()
+        metadata_query = OrganelleMetadata.objects.all()
         if category in ORGANELLE_TYPE_FILTERS:
-            organelle_accessions = OrganelleMetadata.objects.filter(
-                ORGANELLE_TYPE_FILTERS[category]
-            ).values_list('accession', flat=True)
-            matches = matches.filter(accession__in=organelle_accessions)
+            metadata_query = metadata_query.filter(ORGANELLE_TYPE_FILTERS[category])
 
-        fields = CATEGORY_TAXONOMY_FIELDS.get(category, TAXONOMY_SEARCH_FIELDS)
-        for word in words:
-            word_filter = Q()
-            for field in fields:
-                word_filter |= Q(**{f'{field}__icontains': word})
-            matches = matches.filter(word_filter)
+        # Only interact with TaxonomyData when there's an actual word to match against it.
+        if words:
+            fields = CATEGORY_TAXONOMY_FIELDS.get(category, TAXONOMY_SEARCH_FIELDS)
+            taxonomy_matches = TaxonomyData.objects.all()
+            for word in words:
+                word_filter = Q()
+                for field in fields:
+                    word_filter |= Q(**{f'{field}__icontains': word})
+                taxonomy_matches = taxonomy_matches.filter(word_filter)
+            metadata_query = metadata_query.filter(
+                accession__in=taxonomy_matches.values_list('accession', flat=True)
+            )
 
-    accessions = list(matches.values_list('accession', flat=True))
-    total_records = len(accessions)
+    metadata_rows = list(
+        metadata_query.values('accession', 'title', 'base_pair_length', 'updated', 'ambiguity_content')
+    )
+    total_records = len(metadata_rows)
 
-    metadata_by_accession = {
-        metadata.accession: metadata
-        for metadata in OrganelleMetadata.objects.filter(accession__in=accessions)
-    }
-
-    records = []
-    for accession in accessions:
-        metadata = metadata_by_accession.get(accession)
-        records.append({
-            'Accession': accession,
-            'Title': metadata.title if metadata and metadata.title else 'No Title',
-            'BP_Length': metadata.base_pair_length if metadata else None,
-            'Updated': (
-                metadata.updated.strftime('%Y/%m/%d')
-                if metadata and metadata.updated else None
-            ),
-            'Ambiguity_Content': metadata.ambiguity_content if metadata else None,
-        })
+    records = [
+        {
+            'Accession': row['accession'],
+            'Title': row['title'] or 'No Title',
+            'BP_Length': row['base_pair_length'],
+            'Updated': row['updated'].strftime('%Y/%m/%d') if row['updated'] else None,
+            'Ambiguity_Content': row['ambiguity_content'],
+        }
+        for row in metadata_rows
+    ]
 
     df = pl.DataFrame(records) if records else pl.DataFrame(schema=EMPTY_SCHEMA)
 
