@@ -52,6 +52,7 @@ class OrganelleMetadata(models.Model):
     gene_count = models.IntegerField(verbose_name='Total Genes Present', null=True, blank=True)
     gc_content = models.FloatField(blank=True, null=True)
     ambiguity_content = models.FloatField(blank=True, null=True)
+    gene_list = models.JSONField(verbose_name='Gene List', null=True, blank=True)
 
     def __str__(self):
         return f"{self.accession} Metadata"

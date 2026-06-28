@@ -9,6 +9,14 @@
     <form method="POST" action="{% url 'search' %}">
       {% csrf_token %}
       <div class="input-group">
+        <select class="search-category" name="category">
+          <option>Genus & Species</option>
+          <option>Family</option>
+          <option>Order</option>
+          <option>Gene</option>
+          <option>Mitochondrion</option>
+          <option>Chloroplast/Plastid</option>
+        </select>
         <input class="form-control" type="text" name="search_term" placeholder="Search organelle." aria-label="Search">
         <button class="btn btn-primary px-4" type="submit">
           <i class="bi bi-search"></i>
@@ -21,7 +29,7 @@
         <div class ="container pt-2">
           {{ plastid_histogram|safe }}
         </div>
-
+        <br>
             <div class="d-flex align-items-start justify-content-center">
     <div class="organelle_box_home">
       <img src="{% static 'Mitochondria.svg' %}" class="rounded">
