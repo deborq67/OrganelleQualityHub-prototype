@@ -6,23 +6,7 @@
 
   {% block search %}
 
-    <form method="POST" action="{% url 'search' %}">
-      {% csrf_token %}
-      <div class="input-group">
-        <select class="search-category" name="category">
-          <option>Genus & Species</option>
-          <option>Family</option>
-          <option>Order</option>
-          <option>Gene</option>
-          <option>Mitochondrion</option>
-          <option>Chloroplast/Plastid</option>
-        </select>
-        <input class="form-control" type="text" name="search_term" placeholder="Search organelle." aria-label="Search">
-        <button class="btn btn-primary px-4" type="submit">
-          <i class="bi bi-search"></i>
-          </button>
-        </div>
-      </form>
+    {% include "search_function/search_bar.html" %}
 
       <h5>Start your search.</h5>
 
