@@ -172,6 +172,24 @@ def search(request):
     })
 
 
+def general_info(request, accession):
+    # Pulls together the SearchResult title and the OrganelleMetadata
+    # fields for one accession, for the general organelle info page.
+
+    search_result = SearchResult.objects.filter(accession=accession).first()
+    general_result = OrganelleMetadata.objects.filter(accession=accession).first()
+
+    return render(
+        request,
+        'search_function/general_info.html',
+        {
+            'general_result': general_result,
+            'search_result': search_result,
+            'accession': accession,
+        }
+    )
+
+
 # This loads the history into a table.
 def history(request):
     if not request.session.session_key:
@@ -179,6 +197,7 @@ def history(request):
     history_records = SearchHistory.objects.filter(
         session_key=request.session.session_key
     ).values('id', 'search_term', 'total_records', 'searched_at').order_by('-searched_at')
+   
     #Once again using a paginator.
     default_page = 1
     page = request.GET.get('page', default_page)
@@ -203,6 +222,7 @@ def accession_list(request):
     history_accessions = SearchHistory.objects.get(
         id=search_id, session_key=request.session.session_key
     ).search_accessions.split(',')
+
     #Prevents crash if there are no accessions. Also sorts the accessions alphabetically.
     history_accessions = [accession for accession in history_accessions if accession]
     history_accessions.sort()
@@ -233,10 +253,10 @@ def download_results(request):
         result['ambiguity_content'] = metadata.ambiguity_content if metadata else None
 
     df = pl.DataFrame(results)
-    #Main thing here is formatting the time. Cast first since the column may be
-    #entirely null, which would otherwise infer a Null dtype with no .dt accessor.
+
+    #Makes the time readable.
+
     df = df.with_columns(pl.col('updated').cast(pl.Datetime).dt.strftime('%Y-%m-%d'))
-    #Make rows human-readable.
     df = df.rename(
         {
             'accession': 'Accession',
@@ -254,6 +274,7 @@ def download_results(request):
 
 
 def download_history(request):
+
     # Same logic as download_results, but for the history page.
 
     df = pl.DataFrame(list(SearchHistory.objects.filter(

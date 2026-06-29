@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Metadata for {{ accession }}{% endblock %}
+
+{% block header %}
+<h2 class="mb-2">Metadata for {{ accession }}</h2>
+<br>
+{% endblock header %}
+
+  {% block content %}
+
+  {% if general_result %}
+
+    <div class="content">
+      <div class="container">
+<div class = "table-responsive">
+                                    <table class="table table-hover">
+                                      <tbody><tr>
+                                        <td class="descriptions">Accession</td>
+                                        <td class="descriptions">Title</td>
+                                      </tr>
+                                      <tr>
+                                        <td class="accession">{{ accession }}</td>
+                                        <td class="metadata_info" align="center">{{ search_result.title }}</td>
+                                      </tr>
+                                    </tbody></table></div>
+
+
+
+                                    <div class = "table-responsive">
+                                    <table class="table table-hover">
+                                      <tbody><tr>
+                                        <td class="metadata_info">Type</td>
+                                        <td class="metadata_info">Last Updated</td>
+                                        <td class="metadata_info">Base Pair Length</td>
+                                        <td class="metadata_info">No. of RNAs Annotated</td>
+                                        <td class="metadata_info">DNA Stats</td>
+                                      </tr>
+                                      <tr>
+
+                                        <td class="metadata_info">{{ general_result.organelle_type|default_if_none:"Not found." }}</td>
+                                        <td class="metadata_info">{{ general_result.updated|date:"F j, Y"|default:"None found." }}</td>
+                                        <td class="metadata_info">{{ general_result.base_pair_length|default_if_none:"Could not be determined." }}</td>
+                                        <td class="metadata_info"><table><tbody>
+                                        <tr><td><b>rRNA</b>: </td><td>{{ general_result.r_rnas_reported|default_if_none:"None reported." }}</td></tr>
+                                        <tr><td><b>tRNA</b>: </td><td>{{ general_result.t_rnas_reported|default_if_none:"None reported." }}</td></tr>
+                                        </tbody></table></td>
+
+                                        <td class="metadata_info"><table><tbody>
+                                        <tr><td><b>GC Content</b>: </td><td>{{ general_result.gc_content|default_if_none:"Could not be determined." }}</td></tr>
+                                        <tr><td><b>Ambiguity Content</b>:</td><td>{{ general_result.ambiguity_content|default_if_none:"Could not be determined." }}</td></tr>
+                                        </tbody></table></td></tr>
+                                    </tbody></table></div>
+
+      </div>
+    </div>
+
+    {% else %}
+       <div class="custom-bg text-dark">
+      <div class="text-center">
+        <h1 class="display-1 fw-bold">Sorry, no results were found.</h1>
+          </div>
+        </div>
+      {% endif %}
+
+  {% endblock %}
