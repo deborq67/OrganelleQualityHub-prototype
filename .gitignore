@@ -211,3 +211,5 @@ __marimo__/
 organellequalityhub_data/genbank_interaction/migrations/0001_initial.py
 organellequalityhub_data/search_function/migrations/0001_initial.py
 ideas.txt
+
+.vscode

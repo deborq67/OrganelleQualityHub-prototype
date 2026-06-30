@@ -157,22 +157,10 @@ def search(request):
     search_term = request.session.get('search_term', '')
     total_records = request.session.get('total_records', 0)
 
-    # Do it by 20 results per page.
-    default_page = 1
-    page = request.GET.get('page', default_page)
-    paginator = Paginator(search_dict, 20)
-    try:
-        results_page = paginator.page(page)
-    except PageNotAnInteger:
-        results_page = paginator.page(default_page)
-    except EmptyPage:
-        results_page = paginator.page(paginator.num_pages)
-
     return render(request, 'search_function/results.html', {
         'search_term': search_term,
-        'results': results_page,
+        'results': search_dict,
         'total_records': total_records,
-        'page_range': get_page_range(paginator, results_page.number),
     })
 
 
