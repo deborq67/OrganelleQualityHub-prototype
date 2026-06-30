@@ -11,9 +11,10 @@
 
   {% if general_result %}
 
+
     <div class="content">
       <div class="container">
-<div class = "table-responsive">
+        <div class = "table-responsive">
                                     <table class="table table-hover">
                                       <tbody><tr>
                                         <td class="descriptions">Accession</td>
@@ -21,7 +22,7 @@
                                       </tr>
                                       <tr>
                                         <td class="accession">{{ accession }}</td>
-                                        <td class="metadata_info" align="center">{{ search_result.title }}</td>
+                                        <td class="metadata_info text-center">{{ search_result.title }}</td>
                                       </tr>
                                     </tbody></table></div>
 
@@ -38,7 +39,7 @@
                                       </tr>
                                       <tr>
 
-                                        <td class="metadata_info">{{ general_result.organelle_type|default_if_none:"Not found." }}</td>
+                                        <td class="metadata_info">{{ organelle_label|default:"Not found." }}</td>
                                         <td class="metadata_info">{{ general_result.updated|date:"F j, Y"|default:"None found." }}</td>
                                         <td class="metadata_info">{{ general_result.base_pair_length|default_if_none:"Could not be determined." }}</td>
                                         <td class="metadata_info"><table><tbody>
@@ -51,7 +52,6 @@
                                         <tr><td><b>Ambiguity Content</b>:</td><td>{{ general_result.ambiguity_content|default_if_none:"Could not be determined." }}</td></tr>
                                         </tbody></table></td></tr>
                                     </tbody></table></div>
-
       </div>
     </div>
 

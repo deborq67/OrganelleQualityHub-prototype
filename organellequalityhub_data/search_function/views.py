@@ -107,11 +107,15 @@ def search(request):
                 total_records=0,
                 search_accessions='',
             )
-            return render(request, 'search_function/results.html', {
-            'search_term': search_term,
-            'results': [],
-            'total_records': 0,
-            })
+            return render(
+                request,
+                'search_function/results.html',
+                {
+                    'search_term': search_term,
+                    'results': [],
+                    'total_records': 0,
+                }
+            )
 
         # Sort by most recently updates THEN turn to a dictionary for model purposes.
         search_dict = search_query.sort(
@@ -176,8 +180,23 @@ def general_info(request, accession):
     # Pulls together the SearchResult title and the OrganelleMetadata
     # fields for one accession, for the general organelle info page.
 
+    ORGANELLE_TYPE_LABELS = {
+        'mitochondrion': 'Mitochondrion',
+        'mitochondrion:kinetoplast': 'Kinetoplast',
+        'plastid': 'Plastid',
+        'plastid:chloroplast': 'Chloroplast',
+        'plastid:apicoplast': 'Apicoplast',
+        'plastid:chromoplast': 'Chromoplast',
+        'plastid:leucoplast': 'Leucoplast',
+        'plastid:cyanelle': 'Cyanelle',
+    }
+
     search_result = SearchResult.objects.filter(accession=accession).first()
     general_result = OrganelleMetadata.objects.filter(accession=accession).first()
+
+    ir_result = IR_Identification.objects.filter(accession=accession).first()  # add
+
+    is_plastid = (getattr(general_result, 'organelle_type', '') or '').startswith('plastid')
 
     return render(
         request,
@@ -186,6 +205,12 @@ def general_info(request, accession):
             'general_result': general_result,
             'search_result': search_result,
             'accession': accession,
+            'organelle_label': ORGANELLE_TYPE_LABELS.get(
+                general_result.organelle_type,
+                general_result.organelle_type,
+            ) if general_result else None,
+            'ir_result': ir_result,
+            'is_plastid': is_plastid,
         }
     )
 
