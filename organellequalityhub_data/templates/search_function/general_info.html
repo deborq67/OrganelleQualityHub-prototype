@@ -63,4 +63,8 @@
         </div>
       {% endif %}
 
+      {% if is_plastid %}
+  {% include 'genbank_interaction/ir_info.html' %}
+{% endif %}
+
   {% endblock %}
