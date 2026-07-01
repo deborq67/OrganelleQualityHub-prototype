@@ -34,37 +34,67 @@ def get_page_range(paginator, current_page, max_pages=6):
     return left_block + [None] + right_block
 
 
-def index(request):
+def create_graph(request):
     
     # This whole part is to render a html graph.
-    records = list(IR_Identification.objects.values('updated', 'accession'))
-    histogram_df = pl.DataFrame(records) if records else pl.DataFrame(schema={'updated': pl.Date, 'accession': pl.String})
+    plastid_records = list(IR_Identification.objects.values('updated', 'accession'))
+    plastid_histogram_df = pl.DataFrame(plastid_records) if plastid_records else pl.DataFrame(schema={'updated': pl.Date, 'accession': pl.String})
 
-    histogram_df = histogram_df.filter(pl.col('updated').is_not_null())
+    plastid_histogram_df = plastid_histogram_df.filter(pl.col('updated').is_not_null())
 
-    histogram_df = histogram_df.with_columns(pl.col('updated').cast(pl.Date))
-    histogram_df = histogram_df.group_by('updated').agg(pl.len().alias('count')).sort('updated')
-    full_range = pl.DataFrame({'updated': pl.date_range(histogram_df['updated'].min(), histogram_df['updated'].max(), '1d', eager=True)})
-    histogram_df = (
-        full_range
-        .join(histogram_df, on='updated', how='left')
+    plastid_histogram_df = plastid_histogram_df.with_columns(pl.col('updated').cast(pl.Date))
+    plastid_histogram_df = plastid_histogram_df.group_by('updated').agg(pl.len().alias('count')).sort('updated')
+    plastid_full_range = pl.DataFrame({'updated': pl.date_range(plastid_histogram_df['updated'].min(), plastid_histogram_df['updated'].max(), '1d', eager=True)})
+    plastid_histogram_df = (
+        plastid_full_range
+        .join(plastid_histogram_df, on='updated', how='left')
         .fill_null(0)
         .with_columns(pl.col('count').cum_sum().alias('Total Records'))
         .rename({'updated': 'Last Update'})
+        .with_columns(pl.lit('Plastid').alias('Type'))
     )
 
+    mito_records = list(OrganelleMetadata.objects.filter(organelle_type__startswith='mitochondrion').values('updated'))
+    mito_histogram_df = pl.DataFrame(mito_records) if mito_records else pl.DataFrame(schema={'updated': pl.Date})
+    mito_histogram_df = mito_histogram_df.filter(pl.col('updated').is_not_null())
+    mito_histogram_df = mito_histogram_df.with_columns(pl.col('updated').cast(pl.Date))
+    mito_histogram_df = mito_histogram_df.group_by('updated').agg(pl.len().alias('count')).sort('updated')
+    mito_full_range = pl.DataFrame({'updated': pl.date_range(mito_histogram_df['updated'].min(), mito_histogram_df['updated'].max(), '1d', eager=True)})
+    mito_histogram_df = (
+        mito_full_range
+        .join(mito_histogram_df, on='updated', how='left')
+        .fill_null(0)
+        .with_columns(pl.col('count').cum_sum().alias('Total Records'))
+        .rename({'updated': 'Last Update'})
+        .with_columns(pl.lit('Mitochondrion').alias('Type'))
+    )
+
+    total_df = (
+        plastid_histogram_df.select(['Last Update', 'Total Records'])
+        .join(mito_histogram_df.select(['Last Update', 'Total Records']), on='Last Update', how='outer_coalesce')
+        .fill_null(0)
+        .with_columns((pl.col('Total Records') + pl.col('Total Records_right')).alias('Total Records'))
+        .select(['Last Update', 'Total Records'])
+        .with_columns(pl.lit('Total').alias('Type'))
+    )
+
+    cols = ['Last Update', 'Total Records', 'Type']
+    combined_df = pl.concat([plastid_histogram_df.select(cols), mito_histogram_df.select(cols), total_df])
+
     plastid_histogram = px.bar(
-        histogram_df,
+        combined_df,
         x='Last Update',
         y='Total Records',
-        title='Total Annotated Plastid Records Uploaded to GenBank Over Time',
+        color='Type',
+        category_orders={'Type': ['Total', 'Mitochondrion', 'Plastid']},
+        title='Total Annotated Records Uploaded to GenBank Over Time',
         template='none'
     )
     plastid_histogram.update_layout(
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
         xaxis=dict(range=['2015-01-01', date.today().isoformat()]),
-        yaxis=dict(rangemode='nonnegative', title="Records"),
+        yaxis=dict(range=[0, combined_df.filter(pl.col('Type') == 'Total')['Total Records'].max()], title="Records"),
         font=dict(family='Patrick Hand, cursive'),
     )
 

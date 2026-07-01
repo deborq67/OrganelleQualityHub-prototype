@@ -3,7 +3,7 @@ from django.urls import path
 from search_function.views import (
     search,
     general_info,
-    index,
+    create_graph,
     history,
     download_history,
     download_results,
@@ -11,11 +11,10 @@ from search_function.views import (
     download_accessions,
     about,
 )
-from genbank_interaction.views import ir_info
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', index, name='index'),
+    path('', create_graph, name='index'),
     path('results/', search, name='search'),
     path('results/download/', download_results, name='download_results'),
     path('results/<str:accession>/', general_info, name='general_info'),
