@@ -8,11 +8,6 @@
             <div class="table">
               <table class="table table-hover">
                 <tbody>
-                  <tr>
-                    <th scope="row">Accession</th>
-                      <td>{{ ir_result.accession }}</td>
-                      </tr>
-
                       <tr>
                         <th scope="row">IRa Start Position</th>
                           <td>{{ ir_result.ira_reported_start }}</td>
@@ -43,14 +38,61 @@
                                         </div>
 
                                         {% elif ir_result.ir_reported == "no" %}
-                                        <p>No IRs have been annotated on this Genbank file.</p>
+                                        <p>No IRs have been annotated on this record.</p>
 
                                         {% elif ir_result.ir_reported == "exception" %}
                                         <p>This file is an exception. Only one or no IRs are present.</p>
 
                                         {% else %}
-                                          <p>No inverted repeat information could be read from this accession.</p>
+                                        <p>No inverted repeat information could be read from this accession.</p>
 
                                           {% endif %}
+
+            <br>
+            <h2 class="mb-2 text-start">Inverted Repeats Inferred for {{ accession }}</h2>
+            <br>                                
+
+            {% if ir_result.ira_blastinferred == "yes" or ir_result.irb_blastinferred == "yes" %}
+            <div class="table">
+              <table class="table table-hover">
+                <tbody>
+                      <tr>
+                        <th scope="row">IRa Start Position Inferred by BLAST</th>
+                          <td>{{ ir_result.ira_blastinferred_start }}</td>
+                          </tr>
+                          <tr>
+                            <th scope="row">IRa End Position Inferred by BLAST</th>
+                              <td>{{ ir_result.ira_blastinferred_end }}</td>
+                              </tr>
+                              <tr>
+                                <th scope="row">IRa Length Inferred by BLAST (bp)</th>
+                                  <td>{{ ir_result.ira_reported_length }}</td>
+                                  </tr>
+
+                                  <tr>
+                                    <th scope="row">IRb Start Position Inferred by BLAST</th>
+                                      <td>{{ ir_result.irb_blastinferred_start }}</td>
+                                      </tr>
+                                      <tr>
+                                        <th scope="row">IRb End Position Inferred by BLAST</th>
+                                          <td>{{ ir_result.irb_blastinferred_end }}</td>
+                                          </tr>
+                                          <tr>
+                                            <th scope="row">IRb Length (bp) Inferred by BLAST</th>
+                                              <td>{{ ir_result.irb_blastinferred_length }}</td>
+                                              </tr>
+                                            </tbody>
+                                          </table>
                                         </div>
-                                      </div>
+                                        </div>
+
+                                      {% elif ir_result.ira_blastinferred == "yes" or ir_result.irb_blastinferred == "yes" %}
+                                        <p>No IRs have been annotated on this record.</p>
+
+                                        {% elif ir_result.ir_reported == "exception" %}
+                                        <p>This file is an exception. Only one or no IRs are present.</p>
+
+                                        {% else %}
+                                        <p>No inverted repeat information could be inferred for this record.</p>
+
+                                          {% endif %}

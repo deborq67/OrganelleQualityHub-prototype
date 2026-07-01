@@ -16,42 +16,37 @@
       <div class="container">
         <div class = "table-responsive">
                                     <table class="table table-hover">
+                                      <thead><tr>
+                                        <th>Accession</th>
+                                        <th>Title</th>
+                                      </tr></thead>
                                       <tbody><tr>
-                                        <td class="descriptions">Accession</td>
-                                        <td class="descriptions">Title</td>
-                                      </tr>
-                                      <tr>
                                         <td class="accession">{{ accession }}</td>
                                         <td class="metadata_info text-center">{{ search_result.title }}</td>
-                                      </tr>
-                                    </tbody></table></div>
-
-
+                                      </tr></tbody></table></div>
 
                                     <div class = "table-responsive">
                                     <table class="table table-hover">
+                                      <thead><tr>
+                                        <th>Type</th>
+                                        <th>Last Updated</th>
+                                        <th>Base Pair Length</th>
+                                        <th>No. of RNAs Annotated</th>
+                                        <th>DNA Stats</th>
+                                      </tr></thead>
                                       <tbody><tr>
-                                        <td class="metadata_info">Type</td>
-                                        <td class="metadata_info">Last Updated</td>
-                                        <td class="metadata_info">Base Pair Length</td>
-                                        <td class="metadata_info">No. of RNAs Annotated</td>
-                                        <td class="metadata_info">DNA Stats</td>
-                                      </tr>
-                                      <tr>
-
-                                        <td class="metadata_info">{{ organelle_label|default:"Not found." }}</td>
-                                        <td class="metadata_info">{{ general_result.updated|date:"F j, Y"|default:"None found." }}</td>
-                                        <td class="metadata_info">{{ general_result.base_pair_length|default_if_none:"Could not be determined." }}</td>
-                                        <td class="metadata_info"><table><tbody>
+                                        <td>{{ organelle_label|default:"Not found." }}</td>
+                                        <td>{{ general_result.updated|date:"F j, Y"|default:"None found." }}</td>
+                                        <td>{{ general_result.base_pair_length|default_if_none:"Could not be determined." }}</td>
+                                        <td><table><tbody>
                                         <tr><td><b>rRNA</b>: </td><td>{{ general_result.r_rnas_reported|default_if_none:"None reported." }}</td></tr>
                                         <tr><td><b>tRNA</b>: </td><td>{{ general_result.t_rnas_reported|default_if_none:"None reported." }}</td></tr>
                                         </tbody></table></td>
-
-                                        <td class="metadata_info"><table><tbody>
+                                        <td><table><tbody>
                                         <tr><td><b>GC Content</b>: </td><td>{{ general_result.gc_content|default_if_none:"Could not be determined." }}</td></tr>
                                         <tr><td><b>Ambiguity Content</b>:</td><td>{{ general_result.ambiguity_content|default_if_none:"Could not be determined." }}</td></tr>
-                                        </tbody></table></td></tr>
-                                    </tbody></table></div>
+                                        </tbody></table></td>
+                                      </tr></tbody></table></div>
       </div>
     </div>
 
