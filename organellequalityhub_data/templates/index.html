@@ -11,35 +11,33 @@
       <h5>Start your search.</h5>
 
         <div class ="container pt-2">
-          {{ plastid_histogram|safe }}
+          {{ total_histogram|safe }}
         </div>
         <br>
-            <div class="d-flex align-items-start justify-content-center">
-    <div class="organelle_box_home">
+            <div class="d-flex align-items-center justify-content-center rounded p-3 mb-3 organelle_box_home">
+    <div class="organelle_image">
       <img src="{% static 'Mitochondria.svg' %}" class="rounded">
     </div>
     <div class="mainindent ms-3">
       <h3>Mitochondria</h3>
       <p>
-        <a href="">Search All Records</a> Look for all mitochondrial records.<br>
-        <a href="">Human Records</a> Look for all human mitochondrial records.<br>
-        <a href="">Random Record</a> Search for a random mitochondrial record.<br>
-        <br>
+        <a href="/results/?q=&category=Mitochondrion">Search All Records</a> Look for all mitochondrial records.<br>
+        <a href="/results/?q=Homo sapiens&category=Mitochondrion">Human Records</a> Look for all human mitochondrial records.<br>
+        <a href="/results/?random=1&organelle=Mitochondrion">Random Record</a> Search for a random mitochondrial record.
       </p>
     </div>
   </div>
-
-  <div class="d-flex align-items-start justify-content-center">
-    <div class="organelle_box_home">
+<br>
+  <div class="d-flex align-items-center justify-content-center rounded p-3 mb-3 organelle_box_home">
+    <div class="organelle_image">
       <img src="{% static 'Chloroplast.svg' %}" class="rounded">
     </div>
     <div class="mainindent ms-3">
       <h3>Chroloplasts & Other Plastids</h3>
       <p>
-        <a href="">Search All Records</a> Look for all chloroplast and other plastid records.<br>
-        <a href="">IR Reported</a> Look for records that have 2 inverted repeats annotated.<br>
-        <a href="">Random Record</a> Search for a random chloroplast record.<br>
-        <br>
+        <a href="/results/?q=&category=Chloroplast/Plastid">Search All Records</a> Look for all chloroplast and other plastid records.<br>
+        <a href="/results/?q=&category=IR Reported">IR Reported</a> Look for records that have 2 inverted repeats annotated.<br>
+        <a href="/results/?random=1&organelle=Plastid">Random Record</a> Search for a random chloroplast record.
       </p>
     </div>
   </div>

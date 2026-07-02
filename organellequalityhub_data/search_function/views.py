@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from .plastid_search_function import initiate_search
 from .accessions import attach_ir_status
 from .models import SearchResult, SearchHistory
+from random import choice
 from genbank_interaction.models import IR_Identification
 from organism_metadata.models import OrganelleMetadata
 from datetime import date
@@ -81,7 +82,7 @@ def create_graph(request):
     cols = ['Last Update', 'Total Records', 'Type']
     combined_df = pl.concat([plastid_histogram_df.select(cols), mito_histogram_df.select(cols), total_df])
 
-    plastid_histogram = px.bar(
+    total_histogram = px.bar(
         combined_df,
         x='Last Update',
         y='Total Records',
@@ -90,7 +91,7 @@ def create_graph(request):
         title='Total Annotated Records Uploaded to GenBank Over Time',
         template='none'
     )
-    plastid_histogram.update_layout(
+    total_histogram.update_layout(
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
         xaxis=dict(range=['2015-01-01', date.today().isoformat()]),
@@ -98,13 +99,13 @@ def create_graph(request):
         font=dict(family='Patrick Hand, cursive'),
     )
 
-    plastid_histogram = plastid_histogram.to_html(
+    total_histogram = total_histogram.to_html(
         full_html=False,
         include_plotlyjs=False,
         config={'responsive': True}
     )
 
-    return render(request, 'index.html', {'plastid_histogram': plastid_histogram})
+    return render(request, 'index.html', {'total_histogram': total_histogram})
 
 
 def about(request):
@@ -180,17 +181,34 @@ def search(request):
         request.session['search_term'] = search_term
         request.session['total_records'] = total_records
 
-        return redirect('/results/')
+        return redirect(f'/results/?q={search_term or "all"}&category={category}')
+    
+    if 'random' in request.GET:
+        organelle = request.GET.get('organelle', '')
+        qs = OrganelleMetadata.objects.all()
+        if organelle:
+            qs = qs.filter(organelle_type__icontains=organelle)
+        accessions = list(qs.values_list('accession', flat=True))
+        return redirect(f'/results/{choice(accessions)}/') if accessions else redirect('/')
+
 
     # Use search results for paginator.
-    search_dict = request.session.get('search_dict', [])
-    search_term = request.session.get('search_term', '')
-    total_records = request.session.get('total_records', 0)
+    if 'q' in request.GET:
+        search_term = request.GET.get('q', '')
+        category = request.GET.get('category', 'Genus and Species')
+        search_query, total_records = initiate_search(search_term, category)
+        search_dict = [] if search_query.is_empty() else search_query.sort('Updated', descending=True, nulls_last=True).to_dicts()
+    else:
+        search_dict = request.session.get('search_dict', [])
+        search_term = request.session.get('search_term', '')
+        total_records = request.session.get('total_records', 0)
+        category = request.GET.get('category', '')
 
     return render(request, 'search_function/results.html', {
         'search_term': search_term,
         'results': search_dict,
         'total_records': total_records,
+        'category': category,
     })
 
 

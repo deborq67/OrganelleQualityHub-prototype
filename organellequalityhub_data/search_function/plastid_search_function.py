@@ -5,6 +5,7 @@ from django.core.cache import cache
 from django.db.models import Q
 
 from organism_metadata.models import TaxonomyData, OrganelleMetadata
+from genbank_interaction.models import IR_Identification
 
 '''
 Purpose: Searches the locally stored taxonomy records for organisms matching
@@ -31,6 +32,7 @@ ORGANELLE_TYPE_FILTERS = {
     'Chloroplast/Plastid': (
         Q(organelle_type__icontains='chloroplast') | Q(organelle_type__icontains='plastid')
     ),
+    'IR Reported': Q(accession__in=IR_Identification.objects.filter(ir_reported=True).values_list('accession', flat=True)),
 }
 
 EMPTY_SCHEMA = {

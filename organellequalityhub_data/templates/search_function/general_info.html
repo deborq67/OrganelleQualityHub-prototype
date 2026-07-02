@@ -22,7 +22,7 @@
                                       </tr></thead>
                                       <tbody><tr>
                                         <td class="accession">{{ accession }}</td>
-                                        <td class="metadata_info text-center">{{ search_result.title }}</td>
+                                        <td class="metadata_info text-center">{{ general_result.title }}</td>
                                       </tr></tbody></table></div>
 
                                     <div class = "table-responsive">
@@ -38,14 +38,48 @@
                                         <td>{{ organelle_label|default:"Not found." }}</td>
                                         <td>{{ general_result.updated|date:"F j, Y"|default:"None found." }}</td>
                                         <td>{{ general_result.base_pair_length|default_if_none:"Could not be determined." }}</td>
-                                        <td><table><tbody>
-                                        <tr><td><b>rRNA</b>: </td><td>{{ general_result.r_rnas_reported|default_if_none:"None reported." }}</td></tr>
-                                        <tr><td><b>tRNA</b>: </td><td>{{ general_result.t_rnas_reported|default_if_none:"None reported." }}</td></tr>
-                                        </tbody></table></td>
-                                        <td><table><tbody>
-                                        <tr><td><b>GC Content</b>: </td><td>{{ general_result.gc_content|default_if_none:"Could not be determined." }}</td></tr>
-                                        <tr><td><b>Ambiguity Content</b>:</td><td>{{ general_result.ambiguity_content|default_if_none:"Could not be determined." }}</td></tr>
-                                        </tbody></table></td>
+                                        <td class="text-center">
+                                          <div><b>rRNA</b>: {{ general_result.r_rnas_reported|default_if_none:"None reported." }}</div>
+                                          <div><b>tRNA</b>: {{ general_result.t_rnas_reported|default_if_none:"None reported." }}</div>
+                                        </td>
+                                        <td class="text-center">
+                                          <div><b>GC Content</b>: {{ general_result.gc_content|default_if_none:"Could not be determined." }}</div>
+                                          <div><b>Ambiguity Content</b>: {{ general_result.ambiguity_content|default_if_none:"Could not be determined." }}</div>
+                                        </td>
+                                      </tr></tbody></table></div>
+
+                                      <div class="table-responsive">
+                                      <table class="table no-row-hover">
+                                      <thead><tr>
+                                        <th>Total Genes</th>
+                                        <th>Gene List</th>
+                                      </tr></thead>
+                                      <tbody><tr>
+                                        <td class="text-center">{{ general_result.gene_count|default:"Not found." }}</td>
+                                        <td class="text-center">
+                                          {% if general_result.gene_list %}
+                                          <div style="max-height: 150px; overflow-y: auto; border: 1px solid #dee2e6; border-radius: 4px; padding: 4px;">
+                                            <table style="width: 100%; border-collapse: collapse;">
+                                              <thead><tr>
+                                                <th>Gene</th><th>Start</th><th>End</th>
+                                              </tr></thead>
+                                              <tbody>
+                                                {% for gene, locations in general_result.gene_list.items %}
+                                                  {% for loc in locations %}
+                                                    <tr>
+                                                      <td>{{ gene }}</td>
+                                                      <td>{{ loc.0 }}</td>
+                                                      <td>{{ loc.1 }}</td>
+                                                    </tr>
+                                                  {% endfor %}
+                                                {% endfor %}
+                                              </tbody>
+                                            </table>
+                                          </div>
+                                          {% else %}
+                                          None reported.
+                                          {% endif %}
+                                        </td>
                                       </tr></tbody></table></div>
       </div>
     </div>

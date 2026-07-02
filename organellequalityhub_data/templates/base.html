@@ -19,7 +19,7 @@
             color: #000;
             }
 
-            .organelle_box_home img {
+            .organelle_image img {
               width: 150px;
               height: 150px;
               object-fit: contain;
@@ -52,10 +52,9 @@
             background-color: rgba(255, 255, 255, 0.1) !important;
             }
 
-            .table tbody tr:hover,
-            .table tbody tr:hover td {
+            .table:not(.no-row-hover) > tbody > tr:hover,
+            .table:not(.no-row-hover) > tbody > tr:hover > td {
             background-color: rgba(255, 255, 255, 0.25) !important;
-            transform: scale(1.01);
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
             }
 
@@ -67,6 +66,10 @@
             .table small {
             color: #6c757d;
             font-size: 0.8em;
+            }
+
+            .organelle_box_home {
+              background-color: rgba(255, 255, 255, 0.2);
             }
 
             table.dataTable thead th {
@@ -131,7 +134,7 @@
                     <main style="flex: 1; padding: 3vh 0;">
                       <div class="container px-lg-5">
                         <div class="p-4 p-lg-5 bg-light rounded-3 text-center" style="background: linear-gradient(#bbe9f2, #1799b3); border: 2px solid #000;">
-                          <div class="mb-4 mb-lg-5" style="min-height: 60vh">
+                          <div class="my-2 my-lg-3">
                             <div class="container">
                               <div class="row align-items-start">
                                 <div class="col-md-12">

@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Results for {{ search_term }}{% endblock %}
+{% block title %}Results for {% if search_term %}{{ search_term }}{% else %}all {{ category }}{% endif %}{% endblock %}
 
   {% block header %}
     <br>
