@@ -11,6 +11,44 @@ from django.http import HttpResponse
 import plotly.express as px
 from django.core.paginator import (Paginator, EmptyPage, PageNotAnInteger)
 
+CSV_EXPORT_SCHEMA = {
+    'accession': pl.String,
+    'title': pl.String,
+    'base_pair_length': pl.Int64,
+    'updated': pl.Datetime,
+    'ambiguity_content': pl.Float64,
+    'gc_content': pl.Float64,
+    'r_rnas_reported': pl.Int64,
+    't_rnas_reported': pl.Int64,
+    'gene_count': pl.Int64,
+    'gene': pl.String,
+    'start': pl.Int64,
+    'end': pl.Int64,
+}
+
+IR_EXPORT_SCHEMA = {
+    'ira_reported': pl.String,
+    'ira_reported_start': pl.Int64,
+    'ira_reported_end': pl.Int64,
+    'ira_reported_length': pl.Int64,
+    'ira_blastinferred': pl.String,
+    'ira_blastinferred_start': pl.Int64,
+    'ira_blastinferred_end': pl.Int64,
+    'ira_blastinferred_length': pl.Int64,
+    'irb_reported': pl.String,
+    'irb_reported_start': pl.Int64,
+    'irb_reported_end': pl.Int64,
+    'irb_reported_length': pl.Int64,
+    'irb_blastinferred': pl.String,
+    'irb_blastinferred_start': pl.Int64,
+    'irb_blastinferred_end': pl.Int64,
+    'irb_blastinferred_length': pl.Int64,
+}
+
+RECORD_INFO_EXPORT_SCHEMA = {**CSV_EXPORT_SCHEMA, **IR_EXPORT_SCHEMA}
+
+IR_FIELDS = list(IR_EXPORT_SCHEMA.keys())
+
 
 def get_page_range(paginator, current_page, max_pages=6):
     ''' Caps the number of page shown to 6. Once there are more pages than
@@ -299,7 +337,11 @@ def accession_list(request):
 
 
 def download_results(request):
-    results = list(SearchResult.objects.values('accession', 'title'))
+    accession_filter = request.GET.get('accessions')
+    qs = SearchResult.objects.values('accession', 'title')
+    if accession_filter:
+        qs = qs.filter(accession__in=accession_filter.split(','))
+    results = list(qs)
 
     metadata_by_accession = {
         metadata.accession: metadata
@@ -309,11 +351,25 @@ def download_results(request):
     }
     for result in results:
         metadata = metadata_by_accession.get(result['accession'])
-        result['bp_length'] = metadata.base_pair_length if metadata else None
+        result['base_pair_length'] = metadata.base_pair_length if metadata else None
         result['updated'] = metadata.updated if metadata else None
         result['ambiguity_content'] = metadata.ambiguity_content if metadata else None
+        result['gc_content'] = metadata.gc_content if metadata else None
+        result['r_rnas_reported'] = metadata.r_rnas_reported if metadata else None
+        result['t_rnas_reported'] = metadata.t_rnas_reported if metadata else None
+        result['gene_count'] = metadata.gene_count if metadata else None
+        result['gene_list'] = metadata.gene_list if metadata else None
 
-    df = pl.DataFrame(results)
+    expanded = []
+    for r in results:
+        gene_list = r.pop('gene_list') or {}
+        if not gene_list:
+            expanded.append({**r, 'gene': None, 'start': None, 'end': None})
+        for gene, locs in gene_list.items():
+            for loc in locs:
+                expanded.append({**r, 'gene': gene, 'start': loc[0], 'end': loc[1]})
+
+    df = pl.DataFrame(expanded, schema=CSV_EXPORT_SCHEMA)
 
     #Makes the time readable.
 
@@ -322,17 +378,115 @@ def download_results(request):
         {
             'accession': 'Accession',
             'title': 'Title',
-            'bp_length': 'Base_Pair_Length',
             'updated': 'Updated',
+            'base_pair_length': 'Base_Pair_Length',
             'ambiguity_content': 'Ambiguity_Content',
+            'gc_content': 'GC_Content',
+            'r_rnas_reported': 'rRNAs_Reported',
+            't_rnas_reported': 'tRNAs_Reported',
+            'gene_count': 'Gene_Count',
+            'gene': 'Gene',
+            'start': 'Start',
+            'end': 'End',
         }
     )
     response = HttpResponse(df.write_csv(), content_type='text/csv')
     response['Content-Disposition'] = (
-        'attachment; filename="organellequalityhub_data_results.csv"'
+        'attachment; filename="organellequalityhub_results.csv"'
     )
     return response
 
+def download_record_info(request, accession=None):
+    accession_filter = accession or request.GET.get('accessions')
+    filename = f"organellequalityhub_{accession_filter}.csv" if accession_filter else "organellequalityhub_data_results.csv"
+    qs = SearchResult.objects.values('accession', 'title')
+    if accession_filter:
+        qs = qs.filter(accession__in=accession_filter.split(','))
+    results = list(qs)
+
+    metadata_by_accession = {
+        metadata.accession: metadata
+        for metadata in OrganelleMetadata.objects.filter(
+            accession__in=[result['accession'] for result in results]
+        )
+    }
+    ir_by_accession = {
+        ir.accession: ir
+        for ir in IR_Identification.objects.filter(
+            accession__in=[result['accession'] for result in results]
+        )
+    }
+    any_plastid = False
+    for result in results:
+        metadata = metadata_by_accession.get(result['accession'])
+        result['base_pair_length'] = metadata.base_pair_length if metadata else None
+        result['updated'] = metadata.updated if metadata else None
+        result['ambiguity_content'] = metadata.ambiguity_content if metadata else None
+        result['gc_content'] = metadata.gc_content if metadata else None
+        result['r_rnas_reported'] = metadata.r_rnas_reported if metadata else None
+        result['t_rnas_reported'] = metadata.t_rnas_reported if metadata else None
+        result['gene_count'] = metadata.gene_count if metadata else None
+        result['gene_list'] = metadata.gene_list if metadata else None
+
+        result['_is_plastid'] = bool(metadata) and (metadata.organelle_type or '').startswith('plastid')
+        any_plastid = any_plastid or result['_is_plastid']
+
+    expanded = []
+    for r in results:
+        is_plastid = r.pop('_is_plastid')
+        gene_list = r.pop('gene_list') or {}
+        if any_plastid:
+            ir_result = ir_by_accession.get(r['accession']) if is_plastid else None
+            for field in IR_FIELDS:
+                r[field] = getattr(ir_result, field) if ir_result else None
+        if not gene_list:
+            expanded.append({**r, 'gene': None, 'start': None, 'end': None})
+        for gene, locs in gene_list.items():
+            for loc in locs:
+                expanded.append({**r, 'gene': gene, 'start': loc[0], 'end': loc[1]})
+
+    schema = RECORD_INFO_EXPORT_SCHEMA if any_plastid else CSV_EXPORT_SCHEMA
+    df = pl.DataFrame(expanded, schema=schema)
+
+    #Makes the time readable.
+
+    df = df.with_columns(pl.col('updated').cast(pl.Datetime).dt.strftime('%Y-%m-%d'))
+    df = df.rename(
+        {
+            'accession': 'Accession',
+            'title': 'Title',
+            'updated': 'Updated',
+            'base_pair_length': 'Base_Pair_Length',
+            'ambiguity_content': 'Ambiguity_Content',
+            'gc_content': 'GC_Content',
+            'r_rnas_reported': 'rRNAs_Reported',
+            't_rnas_reported': 'tRNAs_Reported',
+            'gene_count': 'Gene_Count',
+            'gene': 'Gene',
+            'start': 'Start',
+            'end': 'End',
+            'ira_reported': 'IRa_Reported',
+            'ira_reported_start': 'IRa_Reported_Start',
+            'ira_reported_end': 'IRa_Reported_End',
+            'ira_reported_length': 'IRa_Reported_Length',
+            'ira_blastinferred': 'IRa_BlastInferred',
+            'ira_blastinferred_start': 'IRa_BlastInferred_Start',
+            'ira_blastinferred_end': 'IRa_BlastInferred_End',
+            'ira_blastinferred_length': 'IRa_BlastInferred_Length',
+            'irb_reported': 'IRb_Reported',
+            'irb_reported_start': 'IRb_Reported_Start',
+            'irb_reported_end': 'IRb_Reported_End',
+            'irb_reported_length': 'IRb_Reported_Length',
+            'irb_blastinferred': 'IRb_BlastInferred',
+            'irb_blastinferred_start': 'IRb_BlastInferred_Start',
+            'irb_blastinferred_end': 'IRb_BlastInferred_End',
+            'irb_blastinferred_length': 'IRb_BlastInferred_Length',
+        },
+        strict=False,
+    )
+    response = HttpResponse(df.write_csv(), content_type='text/csv')
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    return response
 
 def download_history(request):
 

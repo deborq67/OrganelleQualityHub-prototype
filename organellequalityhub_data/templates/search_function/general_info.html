@@ -5,6 +5,17 @@
 {% block header %}
 <h2 class="mb-2">Metadata for {{ accession }}</h2>
 <br>
+{% include "download_modal.html" with modal_id="DownloadRecordModal" label="Record Information" confirm_text="Are you sure you want to download this record?" download_view="download_record_info" url_arg=accession %}
+
+<div class="container">
+                      <div class="row justify-content-center align-items-center">
+                        <div class="col-md-10 pt-2 pb-3">
+                          {% include "search_function/search_bar.html" %}
+                              </div>
+                            </form>
+                          </div>
+                        </div>
+                      </div>
 {% endblock header %}
 
   {% block content %}
@@ -59,7 +70,7 @@
                                         <td class="text-center">
                                           {% if general_result.gene_list %}
                                           <div style="max-height: 150px; overflow-y: auto; border: 1px solid #dee2e6; border-radius: 4px; padding: 4px;">
-                                            <table style="width: 100%; border-collapse: collapse;">
+                                            <table class="gene-list-table" style="width: 100%; border-collapse: collapse;">
                                               <thead><tr>
                                                 <th>Gene</th><th>Start</th><th>End</th>
                                               </tr></thead>

@@ -28,6 +28,8 @@
             .search-category {
               width: 200px;
               background-color: #a2a2a280;
+              text-align: center;
+              text-align-last: center;
             }
             .table td,
             .table th,
@@ -38,14 +40,18 @@
             }
 
             .table th[scope="row"] {
-              background-color: rgba(0, 0, 0, 0.5) !important;
+              background-color: #83a3a9 !important;
               color: #000;
               width: 75%;
             }
 
             .table thead tr {
-            background-color: rgba(0, 0, 0, 0.5) !important;
-            color: #fff;
+            background-color: #83a3a9 !important;
+            color: #000;
+            }
+
+            .gene-list-table thead th {
+            background-color: rgba(131, 163, 169, 0.5) !important;
             }
 
             .table tbody tr {
@@ -63,6 +69,11 @@
             padding: 14px 16px;
             }
 
+            #results-table th,
+            #results-table td {
+            text-align: center;
+            }
+
             .table small {
             color: #6c757d;
             font-size: 0.8em;
@@ -75,6 +86,18 @@
             table.dataTable thead th {
             white-space: nowrap;
             vertical-align: middle;
+            }
+
+            table.dataTable thead th span.dt-column-order::before,
+            table.dataTable thead th span.dt-column-order::after {
+            color: #ffffffc1 !important;
+            opacity: 1 !important;
+            -webkit-text-stroke: 0.4px #000000;
+            }
+
+            table.dataTable thead th.dt-ordering-asc span.dt-column-order::before,
+            table.dataTable thead th.dt-ordering-desc span.dt-column-order::after {
+            color: #404040 !important;
             }
 
             .dt-paging .page-link {
