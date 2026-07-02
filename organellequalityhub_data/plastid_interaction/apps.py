@@ -1,7 +1,7 @@
 from django.apps import AppConfig
 
 
-class GenbankInteractionConfig(AppConfig):
-    name = 'genbank_interaction'
+class PlastidInteractionConfig(AppConfig):
+    name = 'plastid_interaction'
     # To reflect on admin panel:
     verbose_name = "GenBank"

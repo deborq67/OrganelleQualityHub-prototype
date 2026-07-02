@@ -3,7 +3,7 @@ from .plastid_search_function import initiate_search
 from .accessions import attach_ir_status
 from .models import SearchResult, SearchHistory
 from random import choice
-from genbank_interaction.models import IR_Identification
+from plastid_interaction.models import IR_Identification
 from organism_metadata.models import OrganelleMetadata
 from datetime import date
 import polars as pl

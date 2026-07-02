@@ -1,4 +1,4 @@
-from genbank_interaction.models import IR_Identification
+from plastid_interaction.models import IR_Identification
 
 '''
 Purpose: Attaches IR-reported status to a list of accessions, used by the

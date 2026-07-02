@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('genbank_interaction', '0002_alter_ir_identification_table'),
+        ('plastid_interaction', '0002_alter_ir_identification_table'),
     ]
 
     operations = [

@@ -1,4 +1,4 @@
-SUPABASE_APPS = {'genbank_interaction', 'search_function', 'genome_map', 'organism_metadata'}
+SUPABASE_APPS = {'plastid_interaction', 'search_function', 'genome_map', 'organism_metadata'}
 
 
 class SupabaseRouter:

@@ -5,7 +5,7 @@ from django.core.cache import cache
 from django.db.models import Q
 
 from organism_metadata.models import TaxonomyData, OrganelleMetadata
-from genbank_interaction.models import IR_Identification
+from plastid_interaction.models import IR_Identification
 
 '''
 Purpose: Searches the locally stored taxonomy records for organisms matching

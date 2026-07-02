@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("genbank_interaction", "0001_initial"),
+        ("plastid_interaction", "0001_initial"),
     ]
 
     operations = [

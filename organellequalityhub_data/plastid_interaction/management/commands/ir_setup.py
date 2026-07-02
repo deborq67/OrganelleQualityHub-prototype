@@ -10,7 +10,7 @@ def parse_file(filepath):
     import django
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'organellequalityhub_config.settings')
     django.setup()
-    from genbank_interaction.ir_operations import IROperations
+    from plastid_interaction.ir_operations import IROperations
     try:
         return IROperations(filepath).info
     except Exception as e:
@@ -38,7 +38,7 @@ class Command(BaseCommand):
                 'Make sure it is on the same level as manage.py.'
             )
 
-        from genbank_interaction.models import IR_Identification
+        from plastid_interaction.models import IR_Identification
         file_list = [
             file.path
             for file in os.scandir(genbank_dir)
