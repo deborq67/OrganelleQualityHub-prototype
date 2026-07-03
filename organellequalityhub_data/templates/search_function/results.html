@@ -53,7 +53,7 @@
                                                 <tbody>
                                                   {% for result in results %}
                                                     <tr>
-                                                      <td><a href="{% url 'general_info' result.Accession %}">{{ result.Accession }}</a></td>
+                                                      <td><a href="{% url 'general_info' result.Accession %}?category={{ category|urlencode }}">{{ result.Accession }}</a></td>
                                                         <td>{{ result.Title }}</td>
                                                           <td>{{ result.BP_Length|default_if_none:"" }}</td>
                                                             <td>{{ result.Updated|default_if_none:"" }}</td>

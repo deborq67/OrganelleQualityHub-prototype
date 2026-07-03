@@ -65,7 +65,7 @@ def initiate_search(search_term, category='Genus & Species'):
     if category == 'Gene':
         metadata_query = OrganelleMetadata.objects.all()
         for word in words:
-            metadata_query = metadata_query.filter(gene_list__icontains=word)
+            metadata_query = metadata_query.filter(gene_list__has_key=word)
     else:
         metadata_query = OrganelleMetadata.objects.all()
         if category in ORGANELLE_TYPE_FILTERS:

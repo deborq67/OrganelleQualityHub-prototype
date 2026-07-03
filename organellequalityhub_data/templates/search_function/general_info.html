@@ -69,8 +69,13 @@
                                         <td class="text-center">{{ general_result.gene_count|default:"Not found." }}</td>
                                         <td class="text-center">
                                           {% if general_result.gene_list %}
+                                          {% if is_gene_search %}
+                                          <div>
+                                            <table id="gene-list-table" class="gene-list-table" style="width: 100%; border-collapse: collapse;">
+                                          {% else %}
                                           <div style="max-height: 150px; overflow-y: auto; border: 1px solid #dee2e6; border-radius: 4px; padding: 4px;">
                                             <table class="gene-list-table" style="width: 100%; border-collapse: collapse;">
+                                          {% endif %}
                                               <thead><tr>
                                                 <th>Gene</th><th>Start</th><th>End</th>
                                               </tr></thead>

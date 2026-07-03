@@ -2,7 +2,7 @@
     <form method="POST" action="{% url 'search' %}">
       {% csrf_token %}
       <div class="input-group">
-        <select class="search-category" name="category">
+        <select class="form-select search-category" name="category">
           <option>Genus and Species</option>
           <option>Family</option>
           <option>Order</option>

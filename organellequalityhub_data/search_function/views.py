@@ -109,16 +109,20 @@ def create_graph(request):
     )
 
     total_df = (
-        plastid_histogram_df.select(['Last Update', 'Total Records'])
-        .join(mito_histogram_df.select(['Last Update', 'Total Records']), on='Last Update', how='outer_coalesce')
-        .fill_null(0)
+        mito_histogram_df.select(['Last Update', 'Total Records'])
+        .join(plastid_histogram_df.select(['Last Update', 'Total Records']), on='Last Update', how='full', coalesce=True)
+        .sort('Last Update')
+        .with_columns(
+            pl.col('Total Records').forward_fill().fill_null(0),
+            pl.col('Total Records_right').forward_fill().fill_null(0),
+        )
         .with_columns((pl.col('Total Records') + pl.col('Total Records_right')).alias('Total Records'))
         .select(['Last Update', 'Total Records'])
         .with_columns(pl.lit('Total').alias('Type'))
     )
 
     cols = ['Last Update', 'Total Records', 'Type']
-    combined_df = pl.concat([plastid_histogram_df.select(cols), mito_histogram_df.select(cols), total_df])
+    combined_df = pl.concat([total_df.select(cols), mito_histogram_df.select(cols), plastid_histogram_df.select(cols)])
 
     total_histogram = px.bar(
         combined_df,
@@ -126,16 +130,21 @@ def create_graph(request):
         y='Total Records',
         color='Type',
         category_orders={'Type': ['Total', 'Mitochondrion', 'Plastid']},
+        color_discrete_map={'Plastid': 'forestgreen', 'Mitochondrion': 'yellow', 'Total': 'purple'},
         title='Total Annotated Records Uploaded to GenBank Over Time',
         template='none'
     )
+    latest_record_date = combined_df.select(pl.col('Last Update').max().dt.strftime('%Y-%m-%d')).item()
+
     total_histogram.update_layout(
+        barmode='overlay',
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
-        xaxis=dict(range=['2015-01-01', date.today().isoformat()]),
-        yaxis=dict(range=[0, combined_df.filter(pl.col('Type') == 'Total')['Total Records'].max()], title="Records"),
-        font=dict(family='Patrick Hand, cursive'),
+        xaxis=dict(range=['2015-01-01', latest_record_date]),
+        yaxis=dict(range=[0, combined_df['Total Records'].max()], title="Records"),
+        font=dict(family='Patrick Hand, cursive', color='black'),
     )
+    total_histogram.update_traces(marker_opacity=1.0)
 
     total_histogram = total_histogram.to_html(
         full_html=False,
@@ -285,6 +294,7 @@ def general_info(request, accession):
             ) if general_result else None,
             'ir_result': ir_result,
             'is_plastid': is_plastid,
+            'is_gene_search': request.GET.get('category', '') == 'Gene',
         }
     )
 
