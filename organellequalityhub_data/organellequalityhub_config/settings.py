@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'plastid_interaction',
     'genome_map',
     'organism_metadata',
+    'organelle_file_generator',
     'django_pandas',
 ]
 
@@ -162,3 +163,18 @@ STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 GENBANK_DIR = os.path.join(BASE_DIR, "plastid_interaction", "plastid_files")
+
+# Root directory containing plastid_files/ and mitochondrial_files/.
+# Resolution order: GENBANK_ROOT in .env -> parent of BASE_DIR (if the data
+# folders already live there) -> BASE_DIR as a last resort.
+_GENBANK_PARENT = BASE_DIR.parent
+if os.getenv('GENBANK_ROOT'):
+    GENBANK_ROOT = os.getenv('GENBANK_ROOT')
+elif (_GENBANK_PARENT / 'plastid_files').is_dir() or (_GENBANK_PARENT / 'mitochondrial_files').is_dir():
+    GENBANK_ROOT = _GENBANK_PARENT
+else:
+    GENBANK_ROOT = BASE_DIR
+
+# Supabase Storage — used by genome_upload management command
+SUPABASE_URL         = os.getenv('SUPABASE_URL', '')
+SUPABASE_SERVICE_KEY = os.getenv('SUPABASE_SERVICE_KEY', '')

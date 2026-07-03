@@ -18,8 +18,8 @@ class IRIdentificationForm(forms.ModelForm):
 class IRCalculationAdmin(ModelAdmin):
     form = IRIdentificationForm
 
-    list_display = ["accession", "title", "updated_date", "ir_reported", "checked"]
-    list_filter = ["updated", "ir_reported"]
+    list_display = ["accession", "title", "updated_date", "ir_reported", "ira_blastinferred", "irb_blastinferred", "checked"]
+    list_filter = ["updated", "ir_reported", "ira_blastinferred", "irb_blastinferred"]
     list_editable = ["ir_reported"]
     exclude = ["ira_reported", "irb_reported"]
 
@@ -31,6 +31,12 @@ class IRCalculationAdmin(ModelAdmin):
         "irb_reported_start": "ir_reported == 'yes'",
         "irb_reported_end": "ir_reported == 'yes'",
         "irb_reported_length": "ir_reported == 'yes'",
+        "ira_blastinferred_start": "ira_blastinferred == 'yes'",
+        "ira_blastinferred_end": "ira_blastinferred == 'yes'",
+        "ira_blastinferred_length": "ira_blastinferred == 'yes'",
+        "irb_blastinferred_start": "irb_blastinferred == 'yes'",
+        "irb_blastinferred_end": "irb_blastinferred == 'yes'",
+        "irb_blastinferred_length": "irb_blastinferred == 'yes'",
     }
     search_fields = ["accession", "title", "updated"]
 
