@@ -1,7 +1,6 @@
 from django.shortcuts import render, redirect
 from .plastid_search_function import initiate_search
-from .accessions import attach_ir_status
-from .models import SearchResult, SearchHistory
+from .models import SearchResult
 from random import choice
 from plastid_interaction.models import IR_Identification
 from organism_metadata.models import OrganelleMetadata
@@ -9,7 +8,6 @@ from datetime import date
 import polars as pl
 from django.http import HttpResponse
 import plotly.express as px
-from django.core.paginator import (Paginator, EmptyPage, PageNotAnInteger)
 
 CSV_EXPORT_SCHEMA = {
     'accession': pl.String,
@@ -48,29 +46,6 @@ IR_EXPORT_SCHEMA = {
 RECORD_INFO_EXPORT_SCHEMA = {**CSV_EXPORT_SCHEMA, **IR_EXPORT_SCHEMA}
 
 IR_FIELDS = list(IR_EXPORT_SCHEMA.keys())
-
-
-def get_page_range(paginator, current_page, max_pages=6):
-    ''' Caps the number of page shown to 6. Once there are more pages than
-     6, the leading block follows the current page (e.g. on page 4:
-     2 3 4 ... 18 19 20), while the trailing block stays anchored to the
-     last page. Once the leading block would close in on the trailing one,
-     show as continuous instead of a ...'''
-    total_pages = paginator.num_pages
-    if total_pages <= max_pages:
-        return list(range(1, total_pages + 1))
-
-    edge = max_pages // 2
-
-    if current_page >= total_pages - max_pages + 1:
-        left_start = max(1, total_pages - max_pages + 1)
-        return list(range(left_start, total_pages + 1))
-
-    left_end = max(edge, current_page)
-    left_block = list(range(left_end - edge + 1, left_end + 1))
-    right_block = list(range(total_pages - edge + 1, total_pages + 1))
-
-    return left_block + [None] + right_block
 
 
 def create_graph(request):
@@ -163,8 +138,7 @@ def search(request):
     if request.method == 'POST':
         if SearchResult.objects.exists():
             ''' Clear the SearchResult model at the beginning of each new search to
-             keep it from being too bloated. It's only meant to
-            link to SearchHistory anyway, which is persistent.'''
+             keep it from being too bloated.'''
             SearchResult.objects.all().delete()
 
         # Take out white space if user makes a search. Convert to dictionary for model conversion.
@@ -179,12 +153,6 @@ def search(request):
 
         # If no records found, return to results page with message.
         if search_query.is_empty():
-            SearchHistory.objects.create(
-                session_key=request.session.session_key,
-                search_term=search_term,
-                total_records=0,
-                search_accessions='',
-            )
             return render(
                 request,
                 'search_function/results.html',
@@ -202,16 +170,6 @@ def search(request):
             nulls_last=True
         ).to_dicts()
 
-        # Put the search term into history.
-        history_record = SearchHistory.objects.create(
-            session_key=request.session.session_key,
-            search_term=search_term,
-            total_records=total_records,
-            search_accessions=','.join(
-                [record['Accession'] for record in search_dict]
-            )
-        )
-
         SearchResult.objects.bulk_create([
             SearchResult(
                 accession=record['Accession'],
@@ -219,9 +177,6 @@ def search(request):
             )
             for record in search_dict
         ])
-
-        # Save history.
-        history_record.save()
 
         # Save terms for paginator.
         request.session['search_dict'] = search_dict
@@ -295,53 +250,6 @@ def general_info(request, accession):
             'ir_result': ir_result,
             'is_plastid': is_plastid,
             'is_gene_search': request.GET.get('category', '') == 'Gene',
-        }
-    )
-
-
-# This loads the history into a table.
-def history(request):
-    if not request.session.session_key:
-        request.session.create()
-    history_records = SearchHistory.objects.filter(
-        session_key=request.session.session_key
-    ).values('id', 'search_term', 'total_records', 'searched_at').order_by('-searched_at')
-   
-    #Once again using a paginator.
-    default_page = 1
-    page = request.GET.get('page', default_page)
-    paginator = Paginator(history_records, 20)
-    try:
-        results_page = paginator.page(page)
-    except PageNotAnInteger:
-        results_page = paginator.page(default_page)
-    except EmptyPage:
-        results_page = paginator.page(paginator.num_pages)
-
-    return render(request, 'search_function/history.html', {
-        'history_records': results_page,
-        'page_range': get_page_range(paginator, results_page.number),
-    })
-
-
-# This extracts a list of Accession numbers for a separate page.
-def accession_list(request):
-    #Linked to search ID.
-    search_id = request.GET.get('id')
-    history_accessions = SearchHistory.objects.get(
-        id=search_id, session_key=request.session.session_key
-    ).search_accessions.split(',')
-
-    #Prevents crash if there are no accessions. Also sorts the accessions alphabetically.
-    history_accessions = [accession for accession in history_accessions if accession]
-    history_accessions.sort()
-    history_accessions = attach_ir_status(history_accessions)
-    return render(
-        request,
-        'search_function/accessions.html',
-        {
-            'history_accessions': history_accessions,
-            'search_id': search_id
         }
     )
 
@@ -496,64 +404,4 @@ def download_record_info(request, accession=None):
     )
     response = HttpResponse(df.write_csv(), content_type='text/csv')
     response['Content-Disposition'] = f'attachment; filename="{filename}"'
-    return response
-
-def download_history(request):
-
-    # Same logic as download_results, but for the history page.
-
-    df = pl.DataFrame(list(SearchHistory.objects.filter(
-        session_key=request.session.session_key
-    ).values('search_term', 'total_records', 'searched_at')))
-    df = df.with_columns(pl.col('searched_at').cast(pl.Datetime).dt.strftime('%Y-%m-%d %H:%M:%S'))
-    df = df.rename(
-        {
-            'search_term': 'Search_Term',
-            'total_records': 'Records_Found',
-            'searched_at': 'Timestamp'
-        }
-    )
-    response = HttpResponse(df.write_csv(), content_type='text/csv')
-    response['Content-Disposition'] = (
-        'attachment; filename="organellequalityhub_data_history.csv"'
-    )
-    return response
-
-
-def download_accessions(request):
-    # Same logic as download_results, but for the accession records.
-
-    search_id = request.GET.get('id')
-    history_accession_df = pl.DataFrame(
-        list(SearchHistory.objects.values('id', 'search_accessions'))
-    )
-    history_accession_df = (
-        history_accession_df
-        # Splits the comma-separated accessions into a list and then explodes for one accession per row.
-        .with_columns(
-            pl.col('search_accessions').str.split(',')
-        )
-        .explode('search_accessions')
-    )
-    history_accession_df = history_accession_df.rename({'search_accessions': 'accession'})
-
-    ir_info_df = pl.DataFrame(
-        list(IR_Identification.objects.values('accession', 'ir_reported'))
-    )
-    final_df = (
-        history_accession_df
-        .filter(pl.col('id') == int(search_id))
-        .join(ir_info_df, on='accession', how='inner')
-    )
-    final_df = final_df.rename({
-        'accession': 'Accession_ID',
-        'ir_reported': 'IR_Reported'
-    })
-    final_df = final_df.drop('id')
-    if final_df.is_empty():
-        final_df = pl.DataFrame({'Accession_ID': [], 'IR_Reported': []})
-    response = HttpResponse(final_df.write_csv(), content_type='text/csv')
-    response['Content-Disposition'] = (
-        'attachment; filename="plastid_ir_history_accessions.csv"'
-    )
     return response
