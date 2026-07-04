@@ -208,8 +208,6 @@ __marimo__/
 
 /organellequalityhub_data/plastid_files
 
-organellequalityhub_data/plastid_interaction/migrations/0001_initial.py
-organellequalityhub_data/search_function/migrations/0001_initial.py
 ideas.txt
 
 .vscode
