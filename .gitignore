@@ -213,3 +213,5 @@ organellequalityhub_data/search_function/migrations/0001_initial.py
 ideas.txt
 
 .vscode
+
+staticfiles/
