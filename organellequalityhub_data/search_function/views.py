@@ -117,7 +117,7 @@ def create_graph(request):
         plot_bgcolor='rgba(0,0,0,0)',
         xaxis=dict(range=['2015-01-01', latest_record_date]),
         yaxis=dict(range=[0, combined_df['Total Records'].max()], title="Records"),
-        font=dict(family='Patrick Hand, cursive', color='black'),
+        font=dict(family='Merriweather, serif', color='black'),
     )
     total_histogram.update_traces(marker_opacity=1.0)
 

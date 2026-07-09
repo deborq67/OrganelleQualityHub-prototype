@@ -33,12 +33,15 @@ if RENDER_EXTERNAL_HOSTNAME:
 # request was actually HTTPS.
 if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-    SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
+
+# Separate from the block above so it can be turned off for a local,
+# plain-HTTP test run without touching every other production setting.
+SECURE_SSL_REDIRECT = os.getenv('SECURE_SSL_REDIRECT', str(not DEBUG)) == 'True'
 
 # Application definition
 
@@ -191,9 +194,15 @@ STORAGES = {
         "BACKEND": "django.core.files.storage.FileSystemStorage",
     },
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
     },
 }
+
+# Only use WhiteNoise's hashed static files in production. Locally,
+# runserver serves files straight from static/ and doesn't understand
+# the hashed filenames, so it would break local testing.
+if not DEBUG:
+    STORAGES["staticfiles"]["BACKEND"] = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 GENBANK_DIR = os.path.join(BASE_DIR, "plastid_interaction", "plastid_files")
 
 # Root directory containing plastid_files/ and mitochondrial_files/.
