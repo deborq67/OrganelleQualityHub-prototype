@@ -1,0 +1,104 @@
+{% load static %}
+<!doctype html>
+<html class="no-js" lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <title>
+    {% block title %}{% endblock %}
+  </title>
+  <meta name="description" content="{% block description %}{% endblock %}">
+  {% block viewport_meta %}
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  {% endblock %}
+  {% block extra_meta %}{% endblock extra_meta %}
+
+  {# TO-DO: Determine if <link rel="manifest" href="site.webmanifest"> is desirable #}
+
+  {# TO-DO: set defaults for these #}
+  <link rel="shortcut icon" href="{% static 'img/favicon.ico' %}">
+  <link rel="apple-touch-icon" href="{% static 'img/favicon.png' %}">
+
+  {% block css %}
+    <link rel="stylesheet" href="{% static 'css/uswds.css' %}">
+    <script src="{% static 'js/uswds-init.min.js' %}" defer></script>
+  {% endblock %}
+    <link rel="canonical" href="/">
+</head>
+
+<body id="{% block body_id %}default{% endblock %}" class="{% block body_class %}section_front{% endblock %}">
+  <script src="{% static 'js/uswds.min.js' %}" defer></script>
+  <a class="usa-skipnav" href="#main-content">Skip to main content</a>
+
+  {% block banner %}
+    <header class="usa-header usa-header-extended" role="banner">
+      <div class="usa-navbar">
+        {% block logo %}
+          <div class="usa-logo" id="extended-logo">
+            <em class="usa-logo-text">
+              <a href="/"
+                title="Home"
+                aria-label="Home">
+                {% block site_name %}{% endblock %}
+              </a>
+            </em>
+          </div>
+        {% endblock %}
+        <button class="usa-menu-btn">Menu</button>
+      </div>
+      {% block usa_nav %}
+        {% block usa_nav_secondary %}{% endblock %}
+      {% endblock %}
+    </header>
+  {% endblock banner %}
+
+  <div class="usa-overlay"></div>
+  <div id="wrapper">
+      {% block messages %}
+        {% if messages %}
+          <ul class="messages">
+            {% for message in messages %}
+              <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>
+                {{ message }}
+              </li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      {% endblock %}
+
+      {% block section_nav %}{% endblock %}
+
+      <main id="main-content">
+        {% block hero %}{% endblock %}
+        {% block content %}{% endblock %}
+      </main>
+
+      <div role="complementary">
+      {% block content_bottom %}{% endblock %}
+      </div>
+
+    </div>
+
+    <footer id="footer" role="contentinfo">
+      {% block footer_nav %}
+      {% endblock %}
+      {% block footer %}
+        <div>
+          <p class="copyright">&copy; {{ now.year }}</p>
+        </div>
+      {% endblock %}
+    </footer>
+  </div> <!-- /#wrapper -->
+
+  {% block init_js %}{% endblock %}{# useful for vars and other initializations #}
+
+  {% block site_js %}
+  {% endblock %}
+
+  {% block app_js %}{% endblock %}
+
+  {% block extrascript %}{% endblock %}
+</body>
+</html>
+

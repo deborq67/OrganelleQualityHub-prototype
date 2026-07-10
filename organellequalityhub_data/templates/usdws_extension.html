@@ -1,0 +1,217 @@
+{% extends 'base.html' %}
+
+{% comment %}
+  --- <head> blocks: no visible box possible, these don't render in <body> ---
+
+  title        purpose: sets the <title> tag / browser tab text
+               e.g.:     "Home", "Contact Us"
+  description  purpose: <meta name="description">, used by search engines and link previews
+               e.g.:     "Read the latest posts from My Blog."
+  viewport_meta purpose: controls mobile responsive scaling; rarely overridden
+               e.g.:     locking zoom for an app-like page
+  extra_meta   purpose: any additional <meta> tags (robots, Open Graph, etc.)
+               e.g.:     <meta name="robots" content="noindex"> on a private page
+  css          purpose: page-specific stylesheets/scripts layered on top of the base ones
+               e.g.:     a stylesheet only needed on a landing page
+  body_id      purpose: unique id on <body> for page-specific CSS/JS targeting
+               e.g.:     "home", "contact-page"
+  body_class   purpose: class(es) on <body> for page-type styling
+               e.g.:     "home-page", "has-sidebar"
+{% endcomment %}
+{% block title %}Home{% endblock %}
+{% block description %}A demo page overriding every block defined in base.html.{% endblock %}
+{% block viewport_meta %}
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+{% endblock %}
+{% block extra_meta %}
+  <meta name="robots" content="index, follow">
+{% endblock %}
+{% block css %}
+  {{ block.super }}
+{% endblock %}
+{% block body_id %}home{% endblock %}
+{% block body_class %}home-page{% endblock %}
+
+{# below this point, every block wraps its content in a labeled, thin
+   dashed border so you can see exactly which block renders where #}
+
+{% block banner %}
+  <div style="border:1px dashed #888; padding:4px; margin:2px 0;">
+    <div style="font-size:10px; color:#888; line-height:1.4;">
+      <strong>[block: banner]</strong><br>
+      purpose: wraps the site masthead (logo + all navigation) together<br>
+      e.g.: a wordmark, a menu toggle, primary nav links
+    </div>
+    {{ block.super }}
+  </div>
+{% endblock %}
+
+{% block logo %}
+  <div style="border:1px dashed #888; padding:4px; margin:2px 0;">
+    <div style="font-size:10px; color:#888; line-height:1.4;">
+      <strong>[block: logo]</strong><br>
+      purpose: holds the clickable brand mark that links back to the homepage<br>
+      e.g.: an &lt;img&gt; logo, or a text wordmark
+    </div>
+    {{ block.super }}
+  </div>
+{% endblock %}
+
+{% block site_name %}
+  <span style="border:1px dashed #888; padding:2px; display:inline-block;">
+    <span style="font-size:10px; color:#888; display:block;">
+      <strong>[block: site_name]</strong> purpose: the site's name/brand text shown inside the logo link · e.g.: "Acme Corp", "My Blog"
+    </span>
+    {{ site_name }}
+  </span>
+{% endblock %}
+
+{% block usa_nav %}
+  <div style="border:1px dashed #888; padding:4px; margin:2px 0;">
+    <div style="font-size:10px; color:#888; line-height:1.4;">
+      <strong>[block: usa_nav]</strong><br>
+      purpose: wraps the full navigation area (primary + secondary nav together)<br>
+      e.g.: a mega menu, primary links, a search box
+    </div>
+    {{ block.super }}
+  </div>
+{% endblock %}
+
+{% block usa_nav_secondary %}
+  <div style="border:1px dashed #888; padding:4px; margin:2px 0;">
+    <div style="font-size:10px; color:#888; line-height:1.4;">
+      <strong>[block: usa_nav_secondary]</strong><br>
+      purpose: secondary/utility nav links, separate from the primary nav<br>
+      e.g.: "About", "Contact", "Search", "Sign in"
+    </div>
+    <nav aria-label="Secondary navigation">
+      <ul class="usa-nav__secondary-links">
+        <li><a href="/about">About</a></li>
+        <li><a href="/contact">Contact</a></li>
+      </ul>
+    </nav>
+  </div>
+{% endblock %}
+
+{% block messages %}
+  <div style="border:1px dashed #888; padding:4px; margin:2px 0;">
+    <div style="font-size:10px; color:#888; line-height:1.4;">
+      <strong>[block: messages]</strong><br>
+      purpose: flash/alert messages surfaced to the user after an action<br>
+      e.g.: "Your changes were saved.", "Invalid email address."
+    </div>
+    <p class="usa-alert usa-alert--info">This block overrides the default message list.</p>
+  </div>
+{% endblock %}
+
+{% block section_nav %}
+  <div style="border:1px dashed #888; padding:4px; margin:2px 0;">
+    <div style="font-size:10px; color:#888; line-height:1.4;">
+      <strong>[block: section_nav]</strong><br>
+      purpose: in-page or section-local navigation, separate from the site-wide nav<br>
+      e.g.: tabs, or links to sub-pages within a "Docs" section
+    </div>
+    <nav aria-label="Section navigation">
+      <ul>
+        <li><a href="#main-content">Home</a></li>
+      </ul>
+    </nav>
+  </div>
+{% endblock %}
+
+{% block hero %}
+  <div style="border:1px dashed #888; padding:4px; margin:2px 0;">
+    <div style="font-size:10px; color:#888; line-height:1.4;">
+      <strong>[block: hero]</strong><br>
+      purpose: the large, eye-catching banner at the top of a page<br>
+      e.g.: a background photo, a headline, and a call-to-action button
+    </div>
+    <section class="usa-hero">
+      <div class="usa-grid">
+        <div class="usa-hero-callout usa-section-dark">
+          <h2>
+            <span class="usa-hero-callout-alt">This is sample content.</span>
+            This is only sample content.
+          </h2>
+          <p>You'll want to replace it with content of your own.</p>
+        </div>
+      </div>
+    </section>
+  </div>
+{% endblock %}
+
+{% block content %}
+  <div style="border:1px dashed #888; padding:4px; margin:2px 0;">
+    <div style="font-size:10px; color:#888; line-height:1.4;">
+      <strong>[block: content]</strong><br>
+      purpose: the actual page-specific body content<br>
+      e.g.: an article's text, a product listing, a form
+    </div>
+    <div class="usa-grid">
+      <p>Everything on this page comes from a block defined in base.html and overridden here in sample_index.html.</p>
+    </div>
+  </div>
+{% endblock %}
+
+{% block content_bottom %}
+  <div style="border:1px dashed #888; padding:4px; margin:2px 0;">
+    <div style="font-size:10px; color:#888; line-height:1.4;">
+      <strong>[block: content_bottom]</strong><br>
+      purpose: content shown after the main content but before the footer<br>
+      e.g.: a newsletter signup, related articles, comments
+    </div>
+    <p>Content-bottom area, rendered just before the footer.</p>
+  </div>
+{% endblock %}
+
+{% block footer_nav %}
+  <div style="border:1px dashed #888; padding:4px; margin:2px 0;">
+    <div style="font-size:10px; color:#888; line-height:1.4;">
+      <strong>[block: footer_nav]</strong><br>
+      purpose: navigation links inside the footer<br>
+      e.g.: "Privacy Policy", "Terms", "Sitemap"
+    </div>
+    <nav aria-label="Footer navigation">
+      <ul>
+        <li><a href="/privacy">Privacy</a></li>
+      </ul>
+    </nav>
+  </div>
+{% endblock %}
+
+{% block footer %}
+  <div style="border:1px dashed #888; padding:4px; margin:2px 0;">
+    <div style="font-size:10px; color:#888; line-height:1.4;">
+      <strong>[block: footer]</strong><br>
+      purpose: the closing area of every page: copyright, org info<br>
+      e.g.: "© 2026 My Blog."
+    </div>
+    <p class="copyright">&copy; {{ site_name }}</p>
+  </div>
+{% endblock %}
+
+{% comment %}
+  --- script blocks: no visible box possible, these don't render markup
+
+  init_js      purpose: inline JS run early, e.g. setting variables for later scripts
+               e.g.:     analytics config, feature flags
+  site_js      purpose: site-wide JS shared across every page
+               e.g.:     the nav-toggle script (already loaded elsewhere on this page)
+  app_js       purpose: JS specific to this one page
+               e.g.:     a form-validation script only needed here
+  extrascript  purpose: last-chance scripts injected at the very end of <body>
+               e.g.:     a chat-widget embed snippet
+{% endcomment %}
+{% block init_js %}
+  <script>var pageName = 'home';</script>
+{% endblock %}
+{% block site_js %}
+  {# site-wide JS is already loaded by base.html; nothing extra here #}
+{% endblock %}
+{% block app_js %}
+  {# page-specific JS would go here #}
+{% endblock %}
+{% block extrascript %}
+  {# any final scripts would go here #}
+{% endblock %}
+
