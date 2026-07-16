@@ -144,7 +144,7 @@ def search(request):
         # Take out white space if user makes a search. Convert to dictionary for model conversion.
 
         search_term = request.POST.get('search_term', '').strip()
-        category = request.POST.get('category', 'Genus & Species').strip()
+        category = request.POST.get('category', 'Genus and Species').strip()
         search_query, total_records = initiate_search(search_term, category)
 
         # Generate a session if not one yet made.

@@ -2,31 +2,33 @@
 
 {% block title %}Metadata for {{ accession }}{% endblock %}
 
-{% block header %}
-<h2 class="mb-2">Metadata for {{ accession }}</h2>
+{% block hero %}
+<div class="text-center">
+<h2 class="margin-bottom-2 padding-top-3">Metadata for {{ accession }}</h2>
 <br>
 {% include "download_modal.html" with modal_id="DownloadRecordModal" label="Record Information" confirm_text="Are you sure you want to download this record?" download_view="download_record_info" url_arg=accession %}
+</div>
 
-<div class="container">
-                      <div class="row justify-content-center align-items-center">
-                        <div class="col-md-10 pt-2 pb-3">
+<div class="grid-container text-center">
+                      <div class="grid-row flex-justify-center flex-align-center">
+                        <div class="tablet:grid-col-10 padding-top-2 padding-bottom-3">
                           {% include "search_function/search_bar.html" %}
-                              </div>
-                            </form>
-                          </div>
                         </div>
                       </div>
-{% endblock header %}
+                    </div>
+{% endblock hero %}
 
-  {% block content %}
+  {% block content_bottom %}
+
+  <div class="padding-bottom-4 padding-top-4">
 
   {% if general_result %}
 
 
     <div class="content">
-      <div class="container">
-        <div class = "table-responsive">
-                                    <table class="table table-hover">
+      <div class="grid-container">
+        <div class="usa-table-container--scrollable" tabindex="0">
+                                    <table class="usa-table usa-table--borderless usa-table--striped width-full">
                                       <thead><tr>
                                         <th>Accession</th>
                                         <th>Title</th>
@@ -36,8 +38,8 @@
                                         <td class="metadata_info text-center">{{ general_result.title }}</td>
                                       </tr></tbody></table></div>
 
-                                    <div class = "table-responsive">
-                                    <table class="table table-hover">
+                                    <div class="usa-table-container--scrollable" tabindex="0">
+                                    <table class="usa-table usa-table--borderless usa-table--striped width-full">
                                       <thead><tr>
                                         <th>Type</th>
                                         <th>Last Updated</th>
@@ -59,8 +61,8 @@
                                         </td>
                                       </tr></tbody></table></div>
 
-                                      <div class="table-responsive">
-                                      <table class="table no-row-hover">
+                                      <div class="usa-table-container--scrollable" tabindex="0">
+                                      <table class="usa-table usa-table--borderless width-full">
                                       <thead><tr>
                                         <th>Total Genes</th>
                                         <th>Gene List</th>
@@ -101,9 +103,9 @@
     </div>
 
     {% else %}
-       <div class="custom-bg text-dark">
+       <div class="custom-bg text-black">
       <div class="text-center">
-        <h1 class="display-1 fw-bold">Sorry, no results were found.</h1>
+        <h1 class="text-bold">Sorry, no results were found.</h1>
           </div>
         </div>
       {% endif %}
@@ -112,4 +114,6 @@
   {% include 'plastid_interaction/ir_info.html' %}
 {% endif %}
 
-  {% endblock %}
+  </div>
+
+  {% endblock content_bottom %}

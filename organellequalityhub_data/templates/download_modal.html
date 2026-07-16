@@ -1,23 +1,32 @@
+{% load static %}
 {# Usage: modal_id, label, confirm_text, and download_url. #}
 {% if download_view %}{% if url_arg %}{% url download_view url_arg as download_url %}{% else %}{% url download_view as download_url %}{% endif %}{% endif %}
 
-<a class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#{{ modal_id }}">Download {{ label }}</a>
+<a href="#{{ modal_id }}" class="usa-button margin-bottom-3" aria-controls="{{ modal_id }}" data-open-modal>Download {{ label }}</a>
 
-<div class="modal fade" id="{{ modal_id }}" tabindex="-1" aria-labelledby="{{ modal_id }}Label" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h1 class="modal-title fs-5" id="{{ modal_id }}Label">Confirmation</h1>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+<div class="usa-modal" id="{{ modal_id }}" aria-labelledby="{{ modal_id }}-heading" aria-describedby="{{ modal_id }}-description">
+  <div class="usa-modal__content">
+    <div class="usa-modal__main">
+      <h2 class="usa-modal__heading" id="{{ modal_id }}-heading">Confirmation</h2>
+      <div class="usa-prose">
+        <p id="{{ modal_id }}-description">{{ confirm_text }}</p>
       </div>
-      <div class="modal-body">
-        <p>{{ confirm_text }}</p>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary" data-download-url="{{ download_url }}">Yes</button>
+      <div class="usa-modal__footer">
+        <ul class="usa-button-group">
+          <li class="usa-button-group__item">
+            <button type="button" class="usa-button" data-download-url="{{ download_url }}">Yes</button>
+          </li>
+          <li class="usa-button-group__item">
+            <button type="button" class="usa-button usa-button--unstyled padding-105 text-center" data-close-modal>Close</button>
+          </li>
+        </ul>
       </div>
     </div>
+    <button type="button" class="usa-button usa-modal__close" aria-label="Close this window" data-close-modal>
+      <svg class="usa-icon" aria-hidden="true" focusable="false" role="img">
+        <use xlink:href="{% static 'img/sprite.svg' %}#close"></use>
+      </svg>
+    </button>
   </div>
 </div>
 
@@ -25,11 +34,7 @@
   (function () {
     var modalEl = document.getElementById('{{ modal_id }}');
     modalEl.querySelector('[data-download-url]').addEventListener('click', function () {
-      var url = this.dataset.downloadUrl;
-      bootstrap.Modal.getInstance(modalEl).hide();
-      modalEl.addEventListener('hidden.bs.modal', function () {
-        window.location.href = url;
-      }, { once: true });
+      window.location.href = this.dataset.downloadUrl;
     });
   })();
 </script>

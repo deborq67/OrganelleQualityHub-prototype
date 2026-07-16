@@ -2,7 +2,7 @@
     <form method="POST" action="{% url 'search' %}">
       {% csrf_token %}
       <div class="input-group">
-        <select class="form-select search-category" name="category">
+        <select class="usa-select search-category" name="category">
           <option>Genus and Species</option>
           <option>Family</option>
           <option>Order</option>
@@ -10,9 +10,9 @@
           <option>Mitochondrion</option>
           <option>Chloroplast/Plastid</option>
         </select>
-        <input class="form-control" type="text" name="search_term" placeholder="Search organelle." aria-label="Search">
-        <button class="btn btn-primary px-4" type="submit">
-          <i class="bi bi-search"></i>
+        <input class="usa-input" type="text" name="search_term" placeholder="Search organelle." aria-label="Search">
+        <button class="usa-button" type="submit">
+          Search
           </button>
         </div>
       </form>

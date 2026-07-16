@@ -2,45 +2,45 @@
 
 {% block title %}Results for {% if search_term %}{{ search_term }}{% else %}all {{ category }}{% endif %}{% endblock %}
 
-  {% block header %}
+  {% block hero %}
+    <div class="text-center">
     <br>
-    <h3 class="mb-2">Results for {{ search_term }}</h3>
+    <h3 class="margin-bottom-2">Results for {{ search_term }}</h3>
       <h3>{{ total_records }} records found.</h3>
         <br>
 
         {% include "download_modal.html" with modal_id="DownloadResultsModal" label="Results" confirm_text="Are you sure you want to download Results?" download_view="download_results" %}
 
         <script>
-          document.getElementById('DownloadResultsModal').addEventListener('show.bs.modal', function () {
+          document.querySelector('[aria-controls="DownloadResultsModal"]').addEventListener('click', function () {
             const table = $('#results-table').DataTable();
             const accessions = Array.from(table.rows({search: 'applied'}).nodes())
               .map(tr => tr.querySelector('td a').textContent);
-            const btn = this.querySelector('[data-download-url]');
+            const btn = document.querySelector('#DownloadResultsModal [data-download-url]');
             btn.dataset.downloadUrl = '{% url "download_results" %}?accessions=' + accessions.join(',');
           });
         </script>
+    </div>
 
-                    <div class="container">
-                      <div class="row justify-content-center align-items-center">
-                        <div class="col-md-10 pt-2 pb-3">
+                    <div class="grid-container text-center">
+                      <div class="grid-row flex-justify-center flex-align-center">
+                        <div class="tablet:grid-col-10 padding-top-2 padding-bottom-3">
                           {% include "search_function/search_bar.html" %}
-                              </div>
-                            </form>
-                          </div>
                         </div>
                       </div>
-                      
+                    </div>
+
                     {% endblock %}
 
-                    {% block content %}
+                    {% block content_bottom %}
 
                       <div class="content">
-                        <div class="container px-0">
+                        <div class="padding-x-0">
                           {% if results %}
-                            <div class="row justify-content-center">
-                              <div class="col-12">
-                                <div class="table-responsive">
-                                  <table id="results-table" class="table table-hover mx-auto w-100">
+                            <div class="grid-row flex-justify-center">
+                              <div class="grid-col-12">
+                                <div class="usa-table-container--scrollable" tabindex="0">
+                                  <table id="results-table" class="usa-table usa-table--borderless usa-table--striped margin-x-auto" style="width: 90vw;">
                                     <thead>
                                       <tr>
                                         <th scope="col">Accession</th>
@@ -66,6 +66,28 @@
                                                             </div>
                                                           </div>
 
+                                                          <style>
+                                                            .usa-table-container--scrollable:focus:not(:focus-visible) {
+                                                              outline: none;
+                                                            }
+                                                            #results-table_wrapper {
+                                                              max-width: 90vw;
+                                                              margin-left: auto;
+                                                              margin-right: auto;
+                                                            }
+                                                            #results-table_wrapper .dt-search {
+                                                              display: flex;
+                                                              align-items: center;
+                                                            }
+                                                            #results-table_wrapper .dt-search label {
+                                                              order: 1;
+                                                            }
+                                                            #results-table_wrapper .dt-search input {
+                                                              order: 2;
+                                                              margin-left: 0.25rem;
+                                                            }
+                                                          </style>
+
                                                           <script>
                                                             $('#results-table').DataTable();
                                                           </script>
@@ -76,4 +98,4 @@
                                                                   </div>
                                                                 </div>
 
-                                                              {% endblock %}
+                                                              {% endblock content_bottom %}

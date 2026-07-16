@@ -21,7 +21,7 @@ TAXONOMY_SEARCH_FIELDS = [
 
 # Narrower taxonomic field sets for the category dropdown.
 CATEGORY_TAXONOMY_FIELDS = {
-    'Genus & Species': ['genus', 'species', 'subspecies'],
+    'Genus and Species': ['genus', 'species', 'subspecies'],
     'Family': ['family', 'subfamily'],
     'Order': ['order', 'suborder'],
 }
@@ -44,7 +44,7 @@ EMPTY_SCHEMA = {
 }
 
 
-def initiate_search(search_term, category='Genus & Species'):
+def initiate_search(search_term, category='Genus and Species'):
     search_term = search_term.strip()
     if not search_term and category not in ORGANELLE_TYPE_FILTERS:
         return pl.DataFrame(schema=EMPTY_SCHEMA), 0

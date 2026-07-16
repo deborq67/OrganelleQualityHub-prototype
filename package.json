@@ -1,0 +1,12 @@
+{
+  "name": "organellequalityhub-prototype",
+  "private": true,
+  "scripts": {
+    "build:css": "sass --style=expanded --load-path=organellequalityhub_data/static/scss/stylesheets --load-path=organellequalityhub_data/static/packages organellequalityhub_data/static/theme/styles.scss organellequalityhub_data/static/css/styles.css",
+    "watch:css": "npm run build:css -- --watch"
+  },
+  "devDependencies": {
+    "@uswds/uswds": "^3",
+    "sass": "^1.101.0"
+  }
+}

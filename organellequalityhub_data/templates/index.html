@@ -4,42 +4,44 @@
 
 {% block title %}Organelle Quality Hub{% endblock %}
 
-  {% block search %}
+{% block hero %}
+<img class = "usa-hero" src="https://images.pexels.com/photos/15974095/pexels-photo-15974095.jpeg" />
+{% endblock %}
+  {% block content %}
 
+  <div class="grid-container">
     {% include "search_function/search_bar.html" %}
 
-      <h5>Start your search.</h5>
+    <h5>Start your search.</h5>
 
-        <div class ="container pt-2">
-          {{ total_histogram|safe }}
-        </div>
-        <br>
-            <div class="d-flex align-items-center justify-content-center rounded p-3 mb-3 organelle_box_home">
-    <div class="organelle_image">
-      <img src="{% static 'Mitochondrion.svg' %}" class="rounded">
+    <div class="padding-top-2">
+      {{ total_histogram|safe }}
     </div>
-    <div class="mainindent ms-3">
-      <h3>Mitochondria</h3>
-      <p>
-        <a href="/results/?q=&category=Mitochondrion">Search All Records</a> Look for all mitochondrial records.<br>
-        <a href="/results/?q=Homo sapiens&category=Mitochondrion">Human Records</a> Look for all human mitochondrial records.<br>
-        <a href="/results/?random=1&organelle=Mitochondrion">Random Record</a> Search for a random mitochondrial record.
-      </p>
+
+    <div class="usa-media-block flex-align-center organelle_box_home radius-md padding-3 margin-top-3 margin-bottom-3">
+      <img class="usa-media-block__img organelle_image" src="{% static 'Mitochondrion.svg' %}" alt="Mitochondrion icon">
+      <div class="usa-media-block__body">
+        <h3>Mitochondria</h3>
+        <p>
+          <a href="/results/?q=&category=Mitochondrion">Search All Records</a> Look for all mitochondrial records.<br>
+          <a href="/results/?q=Homo sapiens&category=Mitochondrion">Human Records</a> Look for all human mitochondrial records.<br>
+          <a href="/results/?random=1&organelle=Mitochondrion">Random Record</a> Search for a random mitochondrial record.
+        </p>
+      </div>
     </div>
-  </div>
-<br>
-  <div class="d-flex align-items-center justify-content-center rounded p-3 organelle_box_home">
-    <div class="organelle_image">
-      <img src="{% static 'Chloroplast.svg' %}" class="rounded">
+
+    <div class="usa-media-block flex-align-center organelle_box_home radius-md padding-3">
+      <img class="usa-media-block__img organelle_image" src="{% static 'Chloroplast.svg' %}" alt="Chloroplast icon">
+      <div class="usa-media-block__body">
+        <h3>Chroloplasts & Other Plastids</h3>
+        <p>
+          <a href="/results/?q=&category=Chloroplast/Plastid">Search All Records</a> Look for all chloroplast and other plastid records.<br>
+          <a href="/results/?q=&category=IR Reported">IR Reported</a> Look for records that have 2 inverted repeats annotated.<br>
+          <a href="/results/?random=1&organelle=Plastid">Random Record</a> Search for a random chloroplast record.
+        </p>
+      </div>
     </div>
-    <div class="mainindent ms-3">
-      <h3>Chroloplasts & Other Plastids</h3>
-      <p>
-        <a href="/results/?q=&category=Chloroplast/Plastid">Search All Records</a> Look for all chloroplast and other plastid records.<br>
-        <a href="/results/?q=&category=IR Reported">IR Reported</a> Look for records that have 2 inverted repeats annotated.<br>
-        <a href="/results/?random=1&organelle=Plastid">Random Record</a> Search for a random chloroplast record.
-      </p>
-    </div>
+
   </div>
 
-      {% endblock %}
+{% endblock %}
