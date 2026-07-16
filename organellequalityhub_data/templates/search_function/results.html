@@ -13,11 +13,14 @@
 
         <script>
           document.querySelector('[aria-controls="DownloadResultsModal"]').addEventListener('click', function () {
-            const table = $('#results-table').DataTable();
-            const accessions = Array.from(table.rows({search: 'applied'}).nodes())
-              .map(tr => tr.querySelector('td a').textContent);
+            const params = new URLSearchParams({
+              q: '{{ search_term|escapejs }}',
+              category: '{{ category|escapejs }}',
+            });
+            const dtSearch = $('#results-table').DataTable().search();
+            if (dtSearch) params.set('search', dtSearch);
             const btn = document.querySelector('#DownloadResultsModal [data-download-url]');
-            btn.dataset.downloadUrl = '{% url "download_results" %}?accessions=' + accessions.join(',');
+            btn.dataset.downloadUrl = '{% url "download_results" %}?' + params.toString();
           });
         </script>
     </div>
@@ -36,7 +39,7 @@
 
                       <div class="content">
                         <div class="padding-x-0">
-                          {% if results %}
+                          {% if total_records %}
                             <div class="grid-row flex-justify-center">
                               <div class="grid-col-12">
                                 <div class="usa-table-container--scrollable" tabindex="0">
@@ -50,17 +53,7 @@
                                                 <th scope="col">Ambiguity Content</th>
                                                   </tr>
                                                 </thead>
-                                                <tbody>
-                                                  {% for result in results %}
-                                                    <tr>
-                                                      <td><a href="{% url 'general_info' result.Accession %}?category={{ category|urlencode }}">{{ result.Accession }}</a></td>
-                                                        <td>{{ result.Title }}</td>
-                                                          <td>{{ result.BP_Length|default_if_none:"" }}</td>
-                                                            <td>{{ result.Updated|default_if_none:"" }}</td>
-                                                              <td>{% if result.Ambiguity_Content != None %}{{ result.Ambiguity_Content }}%{% endif %}</td>
-                                                                    </tr>
-                                                                    {% endfor %}
-                                                                  </tbody>
+                                                <tbody></tbody>
                                                                 </table>
                                                               </div>
                                                             </div>
@@ -89,7 +82,35 @@
                                                           </style>
 
                                                           <script>
-                                                            $('#results-table').DataTable();
+                                                            $('#results-table').DataTable({
+                                                              serverSide: true,
+                                                              lengthMenu: [10, 25, 50, 100],
+                                                              pageLength: 10,
+                                                              ajax: {
+                                                                url: '{% url "results_data" %}',
+                                                                data: function (d) {
+                                                                  d.q = '{{ search_term|escapejs }}';
+                                                                  d.category = '{{ category|escapejs }}';
+                                                                }
+                                                              },
+                                                              columns: [
+                                                                {
+                                                                  data: null,
+                                                                  render: function (row) {
+                                                                    return '<a href="' + row.href + '">' + row.accession + '</a>';
+                                                                  }
+                                                                },
+                                                                { data: 'title' },
+                                                                { data: 'bp_length' },
+                                                                { data: 'updated' },
+                                                                {
+                                                                  data: 'ambiguity_content',
+                                                                  render: function (value) {
+                                                                    return value === null || value === undefined ? '' : value + '%';
+                                                                  }
+                                                                }
+                                                              ]
+                                                            });
                                                           </script>
                                                                     {% else %}
                                                                     <p>No results found for {{ search_term }}.</p>

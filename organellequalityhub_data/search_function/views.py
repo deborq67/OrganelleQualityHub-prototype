@@ -1,3 +1,4 @@
+import re
 from django.shortcuts import render, redirect
 from .plastid_search_function import initiate_search
 from .models import SearchResult
@@ -6,8 +7,25 @@ from plastid_interaction.models import IR_Identification
 from organism_metadata.models import OrganelleMetadata
 from datetime import date
 import polars as pl
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
+from django.urls import reverse
+from django.utils.http import urlencode
 import plotly.express as px
+
+RESULTS_COLUMNS = ['Accession', 'Title', 'BP_Length', 'Updated', 'Ambiguity_Content']
+
+
+def _apply_datatable_search(df, search_value):
+    """Shared global-search filter for the results table and its download."""
+    search_value = (search_value or '').strip()
+    if not search_value or df.is_empty():
+        return df
+    pattern = re.escape(search_value)
+    mask = pl.any_horizontal([
+        pl.col(c).cast(pl.String, strict=False).str.contains(f'(?i){pattern}')
+        for c in RESULTS_COLUMNS
+    ])
+    return df.filter(mask)
 
 CSV_EXPORT_SCHEMA = {
     'accession': pl.String,
@@ -194,23 +212,63 @@ def search(request):
         return redirect(f'/results/{choice(accessions)}/') if accessions else redirect('/')
 
 
-    # Use search results for paginator.
+    # Table rows now come from results_data(); only the count is needed here.
     if 'q' in request.GET:
         search_term = request.GET.get('q', '')
         category = request.GET.get('category', 'Genus and Species')
-        search_query, total_records = initiate_search(search_term, category)
-        search_dict = [] if search_query.is_empty() else search_query.sort('Updated', descending=True, nulls_last=True).to_dicts()
+        _, total_records = initiate_search(search_term, category)
     else:
-        search_dict = request.session.get('search_dict', [])
         search_term = request.session.get('search_term', '')
         total_records = request.session.get('total_records', 0)
         category = request.GET.get('category', '')
 
     return render(request, 'search_function/results.html', {
         'search_term': search_term,
-        'results': search_dict,
         'total_records': total_records,
         'category': category,
+    })
+
+
+def results_data(request):
+    """DataTables serverSide endpoint for the results table."""
+    search_term = request.GET.get('q', '')
+    category = request.GET.get('category', '')
+    df, total_records = initiate_search(search_term, category)
+
+    filtered_df = _apply_datatable_search(df, request.GET.get('search[value]', ''))
+    records_filtered = filtered_df.height
+
+    order_col_idx = request.GET.get('order[0][column]', '')
+    order_dir = request.GET.get('order[0][dir]', 'asc')
+    order_col = (
+        RESULTS_COLUMNS[int(order_col_idx)]
+        if order_col_idx.isdigit() and int(order_col_idx) < len(RESULTS_COLUMNS)
+        else 'Updated'
+    )
+    if not filtered_df.is_empty():
+        filtered_df = filtered_df.sort(order_col, descending=(order_dir == 'desc'), nulls_last=True)
+
+    start = int(request.GET.get('start', 0) or 0)
+    length = int(request.GET.get('length', 10) or 10)
+    page_df = filtered_df.slice(start, length)
+
+    data = [
+        {
+            'accession': row['Accession'],
+            'href': reverse('general_info', args=[row['Accession']]) + '?' + urlencode({'category': category}),
+            'title': row['Title'] or '',
+            'bp_length': row['BP_Length'] if row['BP_Length'] is not None else '',
+            'updated': row['Updated'] or '',
+            'ambiguity_content': row['Ambiguity_Content'],
+        }
+        for row in page_df.to_dicts()
+    ]
+
+    return JsonResponse({
+        'draw': int(request.GET.get('draw', 1) or 1),
+        'recordsTotal': total_records,
+        'recordsFiltered': records_filtered,
+        'data': data,
     })
 
 
@@ -255,11 +313,21 @@ def general_info(request, accession):
 
 
 def download_results(request):
+    q = request.GET.get('q')
+    category = request.GET.get('category')
     accession_filter = request.GET.get('accessions')
-    qs = SearchResult.objects.values('accession', 'title')
-    if accession_filter:
-        qs = qs.filter(accession__in=accession_filter.split(','))
-    results = list(qs)
+
+    if q is not None or category is not None:
+        # Table search box mode: same filter results_data() uses, so the
+        # download matches whatever's currently visible in the table.
+        df, _ = initiate_search(q or '', category or '')
+        df = _apply_datatable_search(df, request.GET.get('search', ''))
+        results = [{'accession': r['Accession'], 'title': r['Title']} for r in df.to_dicts()]
+    else:
+        qs = SearchResult.objects.values('accession', 'title')
+        if accession_filter:
+            qs = qs.filter(accession__in=accession_filter.split(','))
+        results = list(qs)
 
     metadata_by_accession = {
         metadata.accession: metadata
