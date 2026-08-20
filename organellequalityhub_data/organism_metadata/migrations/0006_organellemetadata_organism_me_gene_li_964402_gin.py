@@ -19,6 +19,10 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.RunSQL(
+            sql="SET statement_timeout = '15min';",
+            reverse_sql=migrations.RunSQL.noop,
+        ),
         AddIndexConcurrently(
             model_name="organellemetadata",
             index=django.contrib.postgres.indexes.GinIndex(
