@@ -1,0 +1,90 @@
+#header{
+    height: 10.2vh;
+}
+
+#header .usa-logo {
+    margin: 0;
+}
+
+#header .usa-navbar {
+    display: flex;
+    overflow: visible;
+}
+
+#header .usa-logo img {
+    height: 9vh;
+    width: auto;
+    margin-top: 0.5vh;
+}
+
+#home-banner{
+    height: 60vh;
+}
+
+#home-search-text{
+    font-weight: normal;
+    font-style: italic;
+}
+
+.dt-search input {
+    float: none;
+}
+
+#results-table th,
+#results-table td {
+    text-align: center;
+}
+
+
+/*
+Keeps inputs white.
+*/
+
+#results-table_wrapper .dt-input {
+    background-color: white;
+}
+
+/*
+Keeps footer from cutting off color.
+*/
+
+#results-table_wrapper .dt-paging-button {
+    background-color: rgba(255, 255, 255, 0.25);
+    color: black;
+    border: 1px solid gray;
+}
+
+/*
+Don't show border when arrows disabled.
+*/
+
+#results-table_wrapper .dt-paging-button.disabled {
+    border: none;
+}
+
+#results-table_wrapper .dt-paging-button.current {
+    font-weight: bold;
+    border-width: 2px;
+    border-color: black;
+}
+
+/*
+Keeps footer from cutting off color.
+*/
+
+#footer {
+    padding-bottom: 1px;
+}
+
+/*
+Orients all arrows to the left.
+*/
+
+#results-table_wrapper .dt-scroll-head .dt-column-header {
+    justify-content: flex-start;
+    flex-direction: row;
+}
+
+#results-table_wrapper .dt-scroll-head .dt-column-order {
+    order: -1;
+}
