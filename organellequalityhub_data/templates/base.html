@@ -17,32 +17,41 @@
   {# TO-DO: Determine if <link rel="manifest" href="site.webmanifest"> is desirable #}
 
   {# TO-DO: set defaults for these #}
+  
   <link rel="icon" type="image/svg+xml" href="{% static 'Mitochondrion.svg' %}">
   <link rel="apple-touch-icon" href="{% static 'Mitochondrion.svg' %}">
 
   {% block css %}
+    <!--Graph-->
     <script src="https://cdn.plot.ly/plotly-3.5.0.min.js" charset="utf-8"></script>
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <!--USWDS CDN (reduces file clutter)-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/uswds/3.13.0/css/uswds.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/uswds/3.13.0/js/uswds-init.min.js" defer></script>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <!--DataTables link-->
     <link rel="stylesheet" href="https://cdn.datatables.net/2.3.2/css/dataTables.dataTables.min.css">
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.datatables.net/2.3.2/js/dataTables.min.js"></script>
-    <script src="{% static 'js/uswds-init.min.js' %}" defer></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/3.2.4/css/buttons.dataTables.min.css">
+    <script src="https://cdn.datatables.net/buttons/3.2.4/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.2.4/js/buttons.colVis.min.js"></script>
+
   {% endblock %}
     <link rel="canonical" href="/">
 </head>
 
 <body id="{% block body_id %}default{% endblock %}" class="{% block body_class %}section_front{% endblock %}">
-  <script src="{% static 'js/uswds.min.js' %}" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/uswds/3.13.0/js/uswds.min.js" defer></script>
   <a class="usa-skipnav" href="#main-content">Skip to main content</a>
 
   {% block banner %}
-    <header class="usa-header usa-header--extended bg-accent-cool-lighter" role="banner">
-      <div class="usa-navbar bg-accent-cool-lighter">
+    <header id="header" class="usa-header usa-header--extended bg-accent-cool-lighter" role="banner">
+      <div class="usa-navbar" style="max-width:none;margin-left:0;">
         {% block logo %}
           <div class="usa-logo" id="extended-logo">
             <em class="usa-logo-text">
               <a href="{% url 'index' %}" title="Home" aria-label="Home">
-                <img src="{% static 'OrganelleQualityHubLogo.svg' %}" alt="Home" class="usa-logo__img">
+                <img src="{% static 'OrganelleQualityHubLogo.svg' %}" alt="Home" class="width-mobile maxw-full" style="height: 9vh; object-fit:contain;object-position:left;">
               </a>
             </em>
           </div>
@@ -56,7 +65,7 @@
   {% endblock banner %}
 
   <div class="usa-overlay"></div>
-  <div id="wrapper">
+  <div id="wrapper" style="background: #c4eeeb;">
       {% block messages %}
         {% if messages %}
           <ul class="messages">
@@ -76,7 +85,7 @@
         {% block content %}{% endblock %}
       </main>
 
-      <div role="table-display" id="table-information">
+      <div id="table-information">
       {% block content_bottom %}{% endblock %}
       </div>
 
@@ -85,7 +94,7 @@
       {% endblock %}
       {% block footer %}
         <div>
-          <p class="copyright">&copy; {% now "Y" %} David Bohorquez</p>
+          <p class="copyright margin-y-1">&copy; {% now "Y" %} David Bohorquez</p>
         </div>
       {% endblock %}
     </footer>

@@ -30,8 +30,8 @@
         <div class="usa-table-container--scrollable" tabindex="0">
                                     <table class="usa-table usa-table--borderless usa-table--striped width-full">
                                       <thead><tr>
-                                        <th>Accession</th>
-                                        <th>Title</th>
+                                        <th scope="col">Accession</th>
+                                        <th scope="col">Title</th>
                                       </tr></thead>
                                       <tbody><tr>
                                         <td class="accession">{{ accession }}</td>
@@ -41,11 +41,11 @@
                                     <div class="usa-table-container--scrollable" tabindex="0">
                                     <table class="usa-table usa-table--borderless usa-table--striped width-full">
                                       <thead><tr>
-                                        <th>Type</th>
-                                        <th>Last Updated</th>
-                                        <th>Base Pair Length</th>
-                                        <th>No. of RNAs Annotated</th>
-                                        <th>DNA Stats</th>
+                                        <th scope="col">Type</th>
+                                        <th scope="col">Last Updated</th>
+                                        <th scope="col">Base Pair Length</th>
+                                        <th scope="col">No. of RNAs Annotated</th>
+                                        <th scope="col">DNA Stats</th>
                                       </tr></thead>
                                       <tbody><tr>
                                         <td>{{ organelle_label|default:"Not found." }}</td>
@@ -64,8 +64,8 @@
                                       <div class="usa-table-container--scrollable" tabindex="0">
                                       <table class="usa-table usa-table--borderless width-full">
                                       <thead><tr>
-                                        <th>Total Genes</th>
-                                        <th>Gene List</th>
+                                        <th scope="col">Total Genes</th>
+                                        <th scope="col">Gene List</th>
                                       </tr></thead>
                                       <tbody><tr>
                                         <td class="text-center">{{ general_result.gene_count|default:"Not found." }}</td>
@@ -79,7 +79,7 @@
                                             <table class="gene-list-table" style="width: 100%; border-collapse: collapse;">
                                           {% endif %}
                                               <thead><tr>
-                                                <th>Gene</th><th>Start</th><th>End</th>
+                                                <th scope="col">Gene</th><th scope="col">Start</th><th scope="col">End</th>
                                               </tr></thead>
                                               <tbody>
                                                 {% for gene, locations in general_result.gene_list.items %}

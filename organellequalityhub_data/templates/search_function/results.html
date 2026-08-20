@@ -17,7 +17,7 @@
               q: '{{ search_term|escapejs }}',
               category: '{{ category|escapejs }}',
             });
-            const dtSearch = $('#results-table').DataTable().search();
+            const dtSearch = mainTable.search();
             if (dtSearch) params.set('search', dtSearch);
             const btn = document.querySelector('#DownloadResultsModal [data-download-url]');
             btn.dataset.downloadUrl = '{% url "download_results" %}?' + params.toString();
@@ -26,10 +26,8 @@
     </div>
 
                     <div class="grid-container text-center">
-                      <div class="grid-row flex-justify-center flex-align-center">
-                        <div class="tablet:grid-col-10 padding-top-2 padding-bottom-3">
-                          {% include "search_function/search_bar.html" %}
-                        </div>
+                      <div class="padding-top-2 padding-bottom-3">
+                        {% include "search_function/search_bar.html" %}
                       </div>
                     </div>
 
@@ -37,86 +35,133 @@
 
                     {% block content_bottom %}
 
-                      <div class="content">
-                        <div class="padding-x-0">
+                      <div class="content grid-container">
+                        <div>
                           {% if total_records %}
                             <div class="grid-row flex-justify-center">
                               <div class="grid-col-12">
-                                <div class="usa-table-container--scrollable" tabindex="0">
-                                  <table id="results-table" class="usa-table usa-table--borderless usa-table--striped margin-x-auto" style="width: 90vw;">
+                                <div id="results-table-region">
+                                  <table id="results-table" class="usa-table usa-table--borderless usa-table--striped margin-x-auto" style="width: 100%;">
                                     <thead>
                                       <tr>
-                                        <th scope="col">Accession</th>
-                                          <th scope="col">Title</th>
-                                            <th scope="col">Base Pair Length</th>
-                                              <th scope="col">Updated</th>
-                                                <th scope="col">Ambiguity Content</th>
-                                                  </tr>
-                                                </thead>
-                                                <tbody></tbody>
-                                                                </table>
-                                                              </div>
-                                                            </div>
-                                                          </div>
+                                        {% for column in columns %}
+                                          <th scope="col" style="padding-top: 0.25rem; padding-bottom: 0.25rem; white-space: nowrap; max-width: 220px;">{{ column.label }}</th>
+                                        {% endfor %}
+                                      </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                  </table>
+                                  <br>
+                                  
+                                  {% if has_ir_data %}
 
-                                                          <style>
-                                                            .usa-table-container--scrollable:focus:not(:focus-visible) {
-                                                              outline: none;
-                                                            }
-                                                            #results-table_wrapper {
-                                                              max-width: 90vw;
-                                                              margin-left: auto;
-                                                              margin-right: auto;
-                                                            }
-                                                            #results-table_wrapper .dt-search {
-                                                              display: flex;
-                                                              align-items: center;
-                                                            }
-                                                            #results-table_wrapper .dt-search label {
-                                                              order: 1;
-                                                            }
-                                                            #results-table_wrapper .dt-search input {
-                                                              order: 2;
-                                                              margin-left: 0.25rem;
-                                                            }
-                                                          </style>
+                                  <table id="ir-table" class="usa-table usa-table--borderless usa-table--striped margin-x-auto" style="width: 100%;">
+                                    <thead>
+                                      <tr>
+                                        {% for column in ir_columns %}
+                                          <th scope="col" style="padding-top: 0.25rem; padding-bottom: 0.25rem; white-space: nowrap;">{{ column.label }}</th>
+                                        {% endfor %}
+                                      </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                  </table>
+                                  {% endif %}
+                                </div>
+                              </div>
+                            </div>
 
-                                                          <script>
-                                                            $('#results-table').DataTable({
-                                                              serverSide: true,
-                                                              lengthMenu: [10, 25, 50, 100],
-                                                              pageLength: 10,
-                                                              ajax: {
-                                                                url: '{% url "results_data" %}',
-                                                                data: function (d) {
-                                                                  d.q = '{{ search_term|escapejs }}';
-                                                                  d.category = '{{ category|escapejs }}';
-                                                                }
-                                                              },
-                                                              columns: [
-                                                                {
-                                                                  data: null,
-                                                                  render: function (row) {
-                                                                    return '<a href="' + row.href + '">' + row.accession + '</a>';
-                                                                  }
-                                                                },
-                                                                { data: 'title' },
-                                                                { data: 'bp_length' },
-                                                                { data: 'updated' },
-                                                                {
-                                                                  data: 'ambiguity_content',
-                                                                  render: function (value) {
-                                                                    return value === null || value === undefined ? '' : value + '%';
-                                                                  }
-                                                                }
-                                                              ]
-                                                            });
-                                                          </script>
-                                                                    {% else %}
-                                                                    <p>No results found for {{ search_term }}.</p>
-                                                                    {% endif %}
+{% comment %}
+                            Ensures this sorts by last updated.
+{% endcomment %}
 
-                                                                  </div>
-                                                                </div>
+                            <script>
+                              const mainTable = new DataTable('#results-table', {
+                                serverSide: true,
+                                order: [[2, 'desc']],
+                                scrollX: true,
+                                ajax: {
+                                  url: '{% url "results_data" %}',
+                                  data: function (d) {
+                                    d.q = '{{ search_term|escapejs }}';
+                                    d.category = '{{ category|escapejs }}';
+                                  }
+                                },
+                                columns: [
+                                  {
+                                    data: 'accession',
+                                    render: function (data, type, row) {
+                                      return type === 'display' ? '<a href="' + row.href + '">' + data + '</a>' : data;
+                                    }
+                                  },
+                                  { data: 'title' },
+                                  { data: 'updated' },
+                                  { data: 'bp_length' },
+                                  { data: 'r_rnas' },
+                                  { data: 't_rnas' },
+                                  { data: 'gc_content' },
+                                  { data: 'ambiguity_content' },
+                                  { data: 'gene_count' }
+                                ]
+                              });
 
-                                                              {% endblock content_bottom %}
+                              {% if has_ir_data %}
+
+                              new DataTable('#ir-table', {
+                              layout: {
+                              topStart: {
+                              buttons: [
+                                 {
+                                  text: 'View BLAST-Inferred IR Values',
+                                  init: function (dt, node, config) {
+                                    node.attr('aria-pressed', 'false');
+                                  },
+                                  action: function (e, dt, node, config) {
+                                    const cols = dt.columns('.toggle-col');
+                                    const isVisible = cols.visible()[0];
+                                    cols.visible(!isVisible);
+                                    node.text(isVisible ? 'View BLAST-Inferred IR Values' : 'Hide BLAST-Inferred IR Values');
+                                    node.toggleClass('dt-button--active');
+                                    node.attr('aria-pressed', isVisible ? 'false' : 'true');
+                                  }
+                                }
+                              ]
+                                  }
+                                },
+                                serverSide: true,
+                                scrollX: true,
+                                ajax: {
+                                  url: '{% url "ir_data" %}',
+                                  data: function (d) {
+                                    d.q = '{{ search_term|escapejs }}';
+                                    d.category = '{{ category|escapejs }}';
+                                  }
+                                },
+                                columns: [
+                                  { data: 'accession' },
+                                  { data: 'ira_reported' },
+                                  { data: 'irb_reported' },
+                                  { data: 'ira_blastinferred', className: 'toggle-col', visible: false  },
+                                  { data: 'irb_blastinferred', className: 'toggle-col', visible: false  }
+                                ]
+                              });
+
+                              {% endif %}
+
+
+                            </script>
+
+                            <style>
+                              #results-table-region {
+                                max-width: 100%;
+                                margin-left: auto;
+                                margin-right: auto;
+                              }
+                            </style>
+                          {% else %}
+                            <p>No results found for {{ search_term }}.</p>
+                          {% endif %}
+
+                        </div>
+                      </div>
+
+                    {% endblock content_bottom %}

@@ -217,3 +217,6 @@ organellequalityhub_data/templates/uswds_template_extension_full.html
 
 node_modules/
 organellequalityhub_data/static/packages/
+
+OQH.txt
+genome_graphs/
