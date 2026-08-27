@@ -260,6 +260,7 @@ def create_graph(request):
         xaxis=dict(range=["2015-01-01", latest_record_date]),
         yaxis=dict(range=[0, combined_df["Total Records"].max()], title="Records"),
         font=dict(family="Merriweather, serif", color="black"),
+        height=225,
     )
     total_histogram.update_traces(marker_opacity=1.0)
 

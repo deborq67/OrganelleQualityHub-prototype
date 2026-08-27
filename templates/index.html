@@ -5,17 +5,17 @@
 {% block title %}Organelle Quality Hub{% endblock %}
 
 {% block hero %}
+{% comment %}
 <img class="usa-hero display-block width-full" src="https://images.pexels.com/photos/15974095/pexels-photo-15974095.jpeg" id="home-banner" alt="" style="object-fit:cover;" />
+{% endcomment %}
 {% endblock %}
   {% block content %}
 
-<div class="bg-accent-cool-dark padding-top-2 padding-bottom-3">
+<div class="bg-accent-warm-lighter padding-top-2 padding-bottom-3">
   <div class="grid-container">
     {% include "search/search_bar.html" %}
 
-    <h2 class="text-center" id="home-search-text">Start your search.</h2>
-
-    <div class="padding-top-2">
+    <div class="padding-top-2" style="max-width:50%;margin:0 auto;">
       {{ total_histogram|safe }}
     </div>
 
@@ -34,7 +34,7 @@
     <div class="usa-media-block flex-align-center bg-accent-warm-lighter radius-md padding-1 margin-bottom-3">
       <img class="usa-media-block__img organelle_image width-15 height-15" src="{% static 'Chloroplast.svg' %}" alt="Chloroplast icon">
       <div class="usa-media-block__body">
-        <h3>Chroloplasts & Other Plastids</h3>
+        <h3>Chloroplasts & Other Plastids</h3>
         <p>
           <a href="/results/?q=*&category=Chloroplast/Plastid">Search All Records</a> Look for all chloroplast and other plastid records.<br>
           <a href="/results/?q=*&category=IR Reported">IR Reported</a> Look for records that have 2 inverted repeats annotated.<br>

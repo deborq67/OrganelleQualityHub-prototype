@@ -45,7 +45,7 @@
   <a class="usa-skipnav" href="#main-content">Skip to main content</a>
 
   {% block banner %}
-    <header id="header" class="usa-header usa-header--extended bg-accent-cool-lighter" role="banner">
+    <header id="header" class="usa-header usa-header--extended bg-accent-warm-lighter" role="banner">
       <div class="usa-navbar" style="max-width:none;margin-left:0;">
         {% block logo %}
           <div class="usa-logo" id="extended-logo">
@@ -65,7 +65,7 @@
   {% endblock banner %}
 
   <div class="usa-overlay"></div>
-  <div id="wrapper" style="background: #c4eeeb;">
+  <div id="wrapper" class="bg-accent-warm-lighter">
       {% block messages %}
         {% if messages %}
           <ul class="messages">

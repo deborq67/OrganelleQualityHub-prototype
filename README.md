@@ -4,6 +4,11 @@ A database for complete organelle genomes on GenBank and their associated qualit
 [Check it out live here.](https://organellequalityhub-prototype.onrender.com/)
 
 
+## Live testing of website in VS Code
+```
+python manage.py runserver
+```
+
 ## Production database deployment
 
 The `Deploy database` GitHub Actions workflow runs Django migrations after changes are pushed to `main`.
