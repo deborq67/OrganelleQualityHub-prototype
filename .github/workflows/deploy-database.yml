@@ -1,0 +1,50 @@
+name: Deploy database
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-database-production
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    name: Apply Django migrations
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: production
+
+    steps:
+      - name: Run migrations on production server
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          port: ${{ secrets.DEPLOY_PORT || 22 }}
+          script_stop: true
+          script: |
+            set -eu
+
+            cd "${{ vars.DEPLOY_PATH }}"
+            git fetch --prune origin
+            git checkout "${{ github.ref_name }}"
+            git pull --ff-only origin "${{ github.ref_name }}"
+
+            sudo -n -u oqhub bash -lc '
+              set -eu
+              cd "${{ vars.DEPLOY_PATH }}"
+
+              if [ -d .venv ]; then
+                . .venv/bin/activate
+              fi
+
+              python manage.py check --deploy
+              python manage.py migrate --database default --noinput
+              python manage.py migrate --database supabase --noinput
+              python manage.py showmigrations --database default
+              python manage.py showmigrations --database supabase
+            '
