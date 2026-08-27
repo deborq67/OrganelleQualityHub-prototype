@@ -151,23 +151,28 @@ def create_graph(request):
         .agg(pl.len().alias("count"))
         .sort("updated")
     )
-    plastid_full_range = pl.DataFrame(
-        {
-            "updated": pl.date_range(
-                plastid_histogram_df["updated"].min(),
-                plastid_histogram_df["updated"].max(),
-                "1d",
-                eager=True,
-            )
-        }
-    )
-    plastid_histogram_df = (
-        plastid_full_range.join(plastid_histogram_df, on="updated", how="left")
-        .fill_null(0)
-        .with_columns(pl.col("count").cum_sum().alias("Total Records"))
-        .rename({"updated": "Last Update"})
-        .with_columns(pl.lit("Plastid").alias("Type"))
-    )
+    if plastid_histogram_df.height:
+        plastid_full_range = pl.DataFrame(
+            {
+                "updated": pl.date_range(
+                    plastid_histogram_df["updated"].min(),
+                    plastid_histogram_df["updated"].max(),
+                    "1d",
+                    eager=True,
+                )
+            }
+        )
+        plastid_histogram_df = (
+            plastid_full_range.join(plastid_histogram_df, on="updated", how="left")
+            .fill_null(0)
+            .with_columns(pl.col("count").cum_sum().alias("Total Records"))
+            .rename({"updated": "Last Update"})
+            .with_columns(pl.lit("Plastid").alias("Type"))
+        )
+    else:
+        plastid_histogram_df = pl.DataFrame(
+            schema={"Last Update": pl.Date, "Total Records": pl.Int64, "Type": pl.String}
+        )
 
     mito_records = list(
         OrganelleMetadata.objects.filter(
@@ -186,23 +191,28 @@ def create_graph(request):
         .agg(pl.len().alias("count"))
         .sort("updated")
     )
-    mito_full_range = pl.DataFrame(
-        {
-            "updated": pl.date_range(
-                mito_histogram_df["updated"].min(),
-                mito_histogram_df["updated"].max(),
-                "1d",
-                eager=True,
-            )
-        }
-    )
-    mito_histogram_df = (
-        mito_full_range.join(mito_histogram_df, on="updated", how="left")
-        .fill_null(0)
-        .with_columns(pl.col("count").cum_sum().alias("Total Records"))
-        .rename({"updated": "Last Update"})
-        .with_columns(pl.lit("Mitochondrion").alias("Type"))
-    )
+    if mito_histogram_df.height:
+        mito_full_range = pl.DataFrame(
+            {
+                "updated": pl.date_range(
+                    mito_histogram_df["updated"].min(),
+                    mito_histogram_df["updated"].max(),
+                    "1d",
+                    eager=True,
+                )
+            }
+        )
+        mito_histogram_df = (
+            mito_full_range.join(mito_histogram_df, on="updated", how="left")
+            .fill_null(0)
+            .with_columns(pl.col("count").cum_sum().alias("Total Records"))
+            .rename({"updated": "Last Update"})
+            .with_columns(pl.lit("Mitochondrion").alias("Type"))
+        )
+    else:
+        mito_histogram_df = pl.DataFrame(
+            schema={"Last Update": pl.Date, "Total Records": pl.Int64, "Type": pl.String}
+        )
 
     total_df = (
         mito_histogram_df.select(["Last Update", "Total Records"])
@@ -257,8 +267,10 @@ def create_graph(request):
         barmode="overlay",
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
-        xaxis=dict(range=["2015-01-01", latest_record_date]),
-        yaxis=dict(range=[0, combined_df["Total Records"].max()], title="Records"),
+        xaxis=dict(range=["2015-01-01", latest_record_date or "2015-01-01"]),
+        yaxis=dict(
+            range=[0, combined_df["Total Records"].max() or 0], title="Records"
+        ),
         font=dict(family="Merriweather, serif", color="black"),
         height=225,
     )

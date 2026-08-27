@@ -38,6 +38,9 @@ pandas==3.0.2
 partd==1.4.2
 pillow==12.3.0
 plotly==6.7.0
+# polars requires an AVX2-capable CPU (x86-64-v3 or newer). On a VM/hypervisor
+# reporting an older baseline (e.g. kvm64/qemu64), importing polars raises
+# "Illegal instruction" and takes down anything that imports the URLconf.
 polars==1.40.1
 polars-runtime-32==1.40.1
 postgrest==2.31.0
