@@ -5,16 +5,10 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv("SECRET_KEY")
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("DEBUG", "False") == "True"
 
 RENDER_EXTERNAL_HOSTNAME = os.getenv("RENDER_EXTERNAL_HOSTNAME")
 
@@ -27,21 +21,6 @@ if os.getenv("DJANGO_ALLOWED_HOSTS"):
 CSRF_TRUSTED_ORIGINS = []
 if RENDER_EXTERNAL_HOSTNAME:
     CSRF_TRUSTED_ORIGINS.append(f"https://{RENDER_EXTERNAL_HOSTNAME}")
-
-# Render forwards requests over plain HTTP internally and tells us the
-# real scheme through this header, so this is how Django knows a
-# request was actually HTTPS.
-if not DEBUG:
-    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
-    SECURE_HSTS_SECONDS = 31536000
-    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-    SECURE_HSTS_PRELOAD = True
-
-# Separate from the block above so it can be turned off for a local,
-# plain-HTTP test run without touching every other production setting.
-SECURE_SSL_REDIRECT = os.getenv("SECURE_SSL_REDIRECT", str(not DEBUG)) == "True"
 
 # Application definition
 
@@ -62,11 +41,13 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.postgres",
-    "search_function",
-    "plastid_interaction",
-    "genome_map",
-    "organism_metadata",
-    "organelle_file_generator",
+    "apps.search",
+    "apps.inverted_repeats",
+    "apps.genome_maps",
+    "apps.taxonomy",
+    "apps.organelle_quality",
+    "apps.genomes",
+    "pipelines",
     "django_pandas",
 ]
 
@@ -81,7 +62,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = "organellequalityhub_config.urls"
+ROOT_URLCONF = "config.urls"
 
 TEMPLATES = [
     {
@@ -98,7 +79,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "organellequalityhub_config.wsgi.application"
+WSGI_APPLICATION = "config.wsgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
@@ -135,7 +116,7 @@ LOGGING = {
     },
 }
 
-DATABASE_ROUTERS = ["organellequalityhub_config.routers.SupabaseRouter"]
+DATABASE_ROUTERS = ["config.routers.SupabaseRouter"]
 
 
 # Password validation
@@ -216,13 +197,6 @@ STORAGES = {
     },
 }
 
-# Only use WhiteNoise's hashed static files in production. Locally,
-# runserver serves files straight from static/ and doesn't understand
-# the hashed filenames, so it would break local testing.
-if not DEBUG:
-    STORAGES["staticfiles"][
-        "BACKEND"
-    ] = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 GENBANK_DIR = os.path.join(BASE_DIR, "plastid_interaction", "plastid_files")
 
 # Root directory containing plastid_files/ and mitochondrial_files/.

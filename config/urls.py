@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path
-from search_function.views import (
+from apps.search.views import (
     search,
     results_data,
     ir_data,

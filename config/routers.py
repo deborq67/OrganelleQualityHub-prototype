@@ -1,4 +1,4 @@
-SUPABASE_APPS = {'plastid_interaction', 'search_function', 'genome_map', 'organism_metadata'}
+SUPABASE_APPS = {'inverted_repeats', 'search', 'genome_maps', 'taxonomy', 'organelle_quality'}
 
 
 class SupabaseRouter:
