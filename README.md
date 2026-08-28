@@ -4,6 +4,10 @@ A database for complete organelle genomes on GenBank and their associated qualit
 [Check it out live here.](https://organellequalityhub-prototype.onrender.com/)
 
 
+## Code Development
+
+[] Add a two- or three-sentence description of its function to the corresponding `__init__.py` file of each app (i.e., `genomes`, `genome_maps`, `inverted_repeats`, `organelle_quality`, `search`, and `taxonomy`).
+
 ## Live testing of website in VS Code
 ```
 python manage.py runserver

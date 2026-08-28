@@ -199,8 +199,6 @@ STORAGES = {
     },
 }
 
-GENBANK_DIR = os.path.join(BASE_DIR, "plastid_interaction", "plastid_files")
-
 # Root directory containing plastid_files/ and mitochondrial_files/.
 # Resolution order: GENBANK_ROOT in .env -> parent of BASE_DIR (if the data
 # folders already live there) -> BASE_DIR as a last resort.

@@ -1,0 +1,10 @@
+[project]
+name = "organellequalityhub"
+version = "0.1.0"
+description = "OrganelleQualityHub: a Django web app for exploring organelle genome quality metrics."
+readme = "README.md"
+requires-python = ">=3.13"
+license = { file = "LICENSE" }
+
+[tool.django-stubs]
+django_settings_module = "config.settings.development"
