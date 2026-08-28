@@ -23,6 +23,7 @@ RESULT_COLUMNS = [
     ("t_rnas_reported", "TRNAs_Reported", "N tRNAs"),
     ("gc_content", "GC_Content", "GC"),
     ("ambiguity_content", "Ambiguity_Content", "N ambig."),
+    ("longest_ambiguity_stretch", "Longest_Ambiguity_Stretch", "Longest ambig. stretch"),
     ("gene_count", "Gene_Count", "N genes"),
 ]
 
@@ -60,7 +61,7 @@ SEARCHABLE_FIELDS = ["accession", "title"]
 
 DOWNLOAD_FIELDS = [
     "accession", "title", "base_pair_length", "updated",
-    "ambiguity_content", "gc_content", "r_rnas_reported",
+    "ambiguity_content", "longest_ambiguity_stretch", "gc_content", "r_rnas_reported",
     "t_rnas_reported", "gene_count", "gene_list",
 ]
 
@@ -93,6 +94,7 @@ CSV_EXPORT_SCHEMA = {
     "base_pair_length": pl.Int64,
     "updated": pl.Datetime,
     "ambiguity_content": pl.Float64,
+    "longest_ambiguity_stretch": pl.Int64,
     "gc_content": pl.Float64,
     "r_rnas_reported": pl.Int64,
     "t_rnas_reported": pl.Int64,
@@ -423,6 +425,10 @@ def results_data(request):
             ),
             "gc_content": row["gc_content"],
             "ambiguity_content": row["ambiguity_content"],
+            "longest_ambiguity_stretch": (
+                row["longest_ambiguity_stretch"]
+                if row["longest_ambiguity_stretch"] is not None else ""
+            ),
             "gene_count": row["gene_count"] if row["gene_count"] is not None else "",
         }
         for row in page
@@ -587,6 +593,7 @@ def download_results(request):
             "updated": "Updated",
             "base_pair_length": "Base_Pair_Length",
             "ambiguity_content": "Ambiguity_Content",
+            "longest_ambiguity_stretch": "Longest_Ambiguity_Stretch",
             "gc_content": "GC_Content",
             "r_rnas_reported": "rRNAs_Reported",
             "t_rnas_reported": "tRNAs_Reported",
@@ -633,6 +640,9 @@ def download_record_info(request, accession=None):
         result["base_pair_length"] = metadata.base_pair_length if metadata else None
         result["updated"] = metadata.updated if metadata else None
         result["ambiguity_content"] = metadata.ambiguity_content if metadata else None
+        result["longest_ambiguity_stretch"] = (
+            metadata.longest_ambiguity_stretch if metadata else None
+        )
         result["gc_content"] = metadata.gc_content if metadata else None
         result["r_rnas_reported"] = metadata.r_rnas_reported if metadata else None
         result["t_rnas_reported"] = metadata.t_rnas_reported if metadata else None
@@ -671,6 +681,7 @@ def download_record_info(request, accession=None):
             "updated": "Updated",
             "base_pair_length": "Base_Pair_Length",
             "ambiguity_content": "Ambiguity_Content",
+            "longest_ambiguity_stretch": "Longest_Ambiguity_Stretch",
             "gc_content": "GC_Content",
             "r_rnas_reported": "rRNAs_Reported",
             "t_rnas_reported": "tRNAs_Reported",
