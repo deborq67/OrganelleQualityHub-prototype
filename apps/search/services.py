@@ -37,14 +37,20 @@ CATEGORY_TAXONOMY_FIELDS = {
     "Order": ["order", "suborder"],
 }
 
-# Organelle type filter for the category dropdown.
+# Independent plastid/mitochondrion toggle filter, applied on top of whatever
+# the category dropdown filters. "plastid" is the default.
 
-ORGANELLE_TYPE_FILTERS = {
-    "Mitochondrion": Q(organelle_type__icontains="mitochondrion"),
-    "Chloroplast/Plastid": (
+ORGANELLE_TYPE_TOGGLE_FILTERS = {
+    "plastid": (
         Q(organelle_type__icontains="chloroplast")
         | Q(organelle_type__icontains="plastid")
     ),
+    "mitochondrion": Q(organelle_type__icontains="mitochondrion"),
+}
+
+# Special-case category filters unrelated to the plastid/mitochondrion toggle.
+
+ORGANELLE_TYPE_FILTERS = {
     "IR Reported": Q(
         accession__in=IR_Identification.objects.filter(ir_reported=True).values_list(
             "accession", flat=True
@@ -111,7 +117,7 @@ def initiate_search(search_term, category="Genus and Species"):
 # Links organelle records to taxonomy.
 
 
-def build_metadata_queryset(search_term, category="Genus and Species"):
+def build_metadata_queryset(search_term, category="Genus and Species", organelle_type="plastid"):
     search_term = search_term.strip()
     is_wildcard = search_term == "*"
     words = [] if is_wildcard else search_term.split()
@@ -139,6 +145,9 @@ def build_metadata_queryset(search_term, category="Genus and Species"):
             metadata_query = metadata_query.filter(
                 accession__in=taxonomy_matches.values_list("accession", flat=True)
             )
+
+    if organelle_type in ORGANELLE_TYPE_TOGGLE_FILTERS:
+        metadata_query = metadata_query.filter(ORGANELLE_TYPE_TOGGLE_FILTERS[organelle_type])
 
     return metadata_query
 

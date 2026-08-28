@@ -9,10 +9,18 @@
                 <option>Family</option>
                 <option>Order</option>
                 <option>Gene</option>
-                <option>Mitochondrion</option>
-                <option>Chloroplast/Plastid</option>
               </select>
               <input class="usa-input flex-4" style="max-width: none;" type="text" name="search_term" placeholder="Search organelle." aria-label="Search" required>
+            </div>
+            <div class="usa-button-group margin-top-2" role="radiogroup" aria-label="Organelle type">
+              <div class="usa-radio">
+                <input class="usa-radio__input usa-radio__input--tile" id="organelle-plastid" type="radio" name="organelle_type" value="plastid" {% if organelle_type != "mitochondrion" %}checked{% endif %}>
+                <label class="usa-radio__label" for="organelle-plastid">Plastids</label>
+              </div>
+              <div class="usa-radio">
+                <input class="usa-radio__input usa-radio__input--tile" id="organelle-mitochondrion" type="radio" name="organelle_type" value="mitochondrion" {% if organelle_type == "mitochondrion" %}checked{% endif %}>
+                <label class="usa-radio__label" for="organelle-mitochondrion">Mitochondria</label>
+              </div>
             </div>
               <button class="usa-button margin-top-4" type="submit">
                 Search

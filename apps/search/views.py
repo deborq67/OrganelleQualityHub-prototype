@@ -295,7 +295,8 @@ def search(request):
 
         search_term = request.POST.get("search_term", "").strip()
         category = request.POST.get("category", "Genus and Species").strip()
-        qs = build_metadata_queryset(search_term, category)
+        organelle_type = request.POST.get("organelle_type", "plastid").strip()
+        qs = build_metadata_queryset(search_term, category, organelle_type)
 
         # Generate a session if not one yet made.
         if not request.session.session_key:
@@ -315,7 +316,7 @@ def search(request):
 
         request.session["search_term"] = search_term
 
-        return redirect(f'/results/?q={search_term or "*"}&category={category}')
+        return redirect(f'/results/?q={search_term or "*"}&category={category}&organelle_type={organelle_type}')
 
     # For random results:
     if "random" in request.GET:
@@ -335,9 +336,10 @@ def search(request):
     else:
         search_term = request.session.get("search_term", "")
         category = request.GET.get("category", "")
+    organelle_type = request.GET.get("organelle_type", "plastid")
 
-    total_records = build_metadata_queryset(search_term, category).count()
-    accessions = build_metadata_queryset(search_term, category).values_list(
+    total_records = build_metadata_queryset(search_term, category, organelle_type).count()
+    accessions = build_metadata_queryset(search_term, category, organelle_type).values_list(
         "accession", flat=True
     )
     has_ir_data = IR_Identification.objects.filter(accession__in=accessions).exists()
@@ -358,6 +360,7 @@ def search(request):
         {
             "search_term": search_term,
             "category": category,
+            "organelle_type": organelle_type,
             "total_records": total_records,
             "columns": columns,
             "ir_columns": ir_columns,
@@ -371,6 +374,7 @@ def results_data(request):
 
     q = request.GET.get("q", "")
     category = request.GET.get("category", "Genus and Species")
+    organelle_type = request.GET.get("organelle_type", "plastid")
     draw = _int_param(request.GET.get("draw"), 1)
     start = _int_param(request.GET.get("start"), 0)
     length = _int_param(request.GET.get("length"), 10)
@@ -378,8 +382,8 @@ def results_data(request):
     order_col_index = _int_param(request.GET.get("order[0][column]"), 2)
     order_dir = request.GET.get("order[0][dir]", "desc")
 
-    qs = build_metadata_queryset(q, category)
-    total_cache_key = f"results_total:{category}:{q}"
+    qs = build_metadata_queryset(q, category, organelle_type)
+    total_cache_key = f"results_total:{category}:{organelle_type}:{q}"
     records_total = cache.get(total_cache_key)
     if records_total is None:
         records_total = qs.count()
@@ -392,7 +396,7 @@ def results_data(request):
 
     # Filt
 
-    filtered_cache_key = f"results_filtered:{category}:{q}:{search_value}"
+    filtered_cache_key = f"results_filtered:{category}:{organelle_type}:{q}:{search_value}"
     records_filtered = cache.get(filtered_cache_key)
     if records_filtered is None:
         records_filtered = qs.count() if search_value else records_total
@@ -449,6 +453,7 @@ def ir_data(request):
 
     q = request.GET.get("q", "")
     category = request.GET.get("category", "Genus and Species")
+    organelle_type = request.GET.get("organelle_type", "plastid")
     draw = _int_param(request.GET.get("draw"), 1)
     start = _int_param(request.GET.get("start"), 0)
     length = _int_param(request.GET.get("length"), 10)
@@ -457,11 +462,11 @@ def ir_data(request):
     order_dir = request.GET.get("order[0][dir]", "desc")
 
     # Here we use build_metadata_queryset ONLY to pull accessions. Then use that to pull IR info.
-    accessions = build_metadata_queryset(q, category).values_list(
+    accessions = build_metadata_queryset(q, category, organelle_type).values_list(
         "accession", flat=True
     )
     qs = IR_Identification.objects.filter(accession__in=accessions)
-    total_cache_key = f"ir_total:{category}:{q}"
+    total_cache_key = f"ir_total:{category}:{organelle_type}:{q}"
     records_total = cache.get(total_cache_key)
     if records_total is None:
         records_total = qs.count()
@@ -474,7 +479,7 @@ def ir_data(request):
 
     # Caches depending on DataTables search box.
 
-    filtered_cache_key = f"ir_filtered:{category}:{q}:{search_value}"
+    filtered_cache_key = f"ir_filtered:{category}:{organelle_type}:{q}:{search_value}"
     records_filtered = cache.get(filtered_cache_key)
     if records_filtered is None:
         records_filtered = qs.count() if search_value else records_total
@@ -563,7 +568,8 @@ def download_results(request):
     if q is not None or category is not None:
         # Table search box mode: same filter results_data() uses, so the
         # download matches whatever's currently visible in the table.
-        qs = build_metadata_queryset(q or "", category or "")
+        organelle_type = request.GET.get("organelle_type", "plastid")
+        qs = build_metadata_queryset(q or "", category or "", organelle_type)
         qs = _apply_search_filter(qs, request.GET.get("search", ""))
         results = list(qs.values(*DOWNLOAD_FIELDS))
     else:

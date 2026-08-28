@@ -16,6 +16,7 @@
             const params = new URLSearchParams({
               q: '{{ search_term|escapejs }}',
               category: '{{ category|escapejs }}',
+              organelle_type: '{{ organelle_type|escapejs }}',
             });
             const dtSearch = mainTable.search();
             if (dtSearch) params.set('search', dtSearch);
@@ -84,6 +85,7 @@
                                   data: function (d) {
                                     d.q = '{{ search_term|escapejs }}';
                                     d.category = '{{ category|escapejs }}';
+                                    d.organelle_type = '{{ organelle_type|escapejs }}';
                                   }
                                 },
                                 columns: [
@@ -135,6 +137,7 @@
                                   data: function (d) {
                                     d.q = '{{ search_term|escapejs }}';
                                     d.category = '{{ category|escapejs }}';
+                                    d.organelle_type = '{{ organelle_type|escapejs }}';
                                   }
                                 },
                                 columns: [
