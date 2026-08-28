@@ -29,6 +29,9 @@ class OrganelleMetadata(models.Model):
     )
     gc_content = models.FloatField(blank=True, null=True)
     ambiguity_content = models.FloatField(blank=True, null=True)
+    longest_ambiguity_stretch = models.IntegerField(
+        verbose_name="Longest Ambiguity Stretch (bp)", null=True, blank=True
+    )
     gene_list = models.JSONField(verbose_name="Gene List", null=True, blank=True)
 
     def __str__(self):

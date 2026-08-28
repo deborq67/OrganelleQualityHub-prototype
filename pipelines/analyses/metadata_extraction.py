@@ -33,7 +33,7 @@ DEFAULT_CHUNKSIZE = 50  # cap so results trickle back often enough to hit the ba
 
 STATS_SCHEMA = {
     'gene_count': pl.Int64, 'gene_list': pl.Utf8, 'r_rnas_reported': pl.Int64, 't_rnas_reported': pl.Int64,
-    'gc_content': pl.Float64, 'ambiguity_content': pl.Float64,
+    'gc_content': pl.Float64, 'ambiguity_content': pl.Float64, 'longest_ambiguity_stretch': pl.Int64,
     'base_pair_length': pl.Int64, 'updated': pl.Datetime, 'title': pl.Utf8,
     'organelle_type': pl.Utf8,
 }

@@ -78,7 +78,17 @@ class GenomeOperations:
             't_rnas_reported': sum(f.type == 'tRNA' for f in self.record.features),
             'gc_content': round(sum(seq.count(b) for b in 'GC') / length * 100, 2) if length else None,
             'ambiguity_content': round((length - sum(seq.count(b) for b in 'ACGT')) / length * 100, 2) if length else None,
+            'longest_ambiguity_stretch': self._longest_ambiguity_stretch(seq),
             'base_pair_length': length,
             'updated': self._parse_date() or self._file_date(),
             'organelle_type': self.organelle_type(),
         }
+
+    @staticmethod
+    def _longest_ambiguity_stretch(seq: str) -> int:
+        """Length of the longest run of consecutive non-ACGT (IUPAC ambiguity code) bases."""
+        longest = current = 0
+        for base in seq:
+            current = current + 1 if base not in 'ACGT' else 0
+            longest = max(longest, current)
+        return longest
