@@ -15,6 +15,46 @@
   <div class="grid-container">
     {% include "search/search_bar.html" %}
 
+    <div class="grid-row grid-gap margin-bottom-3">
+      <div class="tablet:grid-col-6">
+        <div class="usa-media-block flex-align-center bg-white radius-md border-1px border-base-lighter padding-1 height-full">
+        <img class="usa-media-block__img organelle_image width-15 height-15" src="{% static 'DNA.svg' %}" alt="Mitochondrion icon">
+          <div class="usa-media-block__body">
+            <h3>Containing {{plastid_count}} Plastids Records</h3>
+          </div>
+        </div>
+      </div>
+
+      <div class="tablet:grid-col-6">
+        <div class="usa-media-block flex-align-center bg-white radius-md padding-1 height-full">
+          <img class="usa-media-block__img organelle_image width-15 height-15" src="{% static 'DNA.svg' %}" alt="Chloroplast icon">
+          <div class="usa-media-block__body">
+            <h3>{{taxonomy_count}} Genera</h3>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-row grid-gap margin-bottom-3">
+      <div class="tablet:grid-col-6">
+        <div class="usa-media-block flex-align-center bg-white radius-md border-1px border-base-lighter padding-1 height-full">
+        <img class="usa-media-block__img organelle_image width-15 height-15" src="{% static 'DNA.svg' %}" alt="Mitochondrion icon">
+          <div class="usa-media-block__body">
+            <h3>Last Updated {{last_update}}</h3>
+          </div>
+        </div>
+      </div>
+
+      <div class="tablet:grid-col-6">
+        <div class="usa-media-block flex-align-center bg-white radius-md padding-1 height-full">
+          <img class="usa-media-block__img organelle_image width-15 height-15" src="{% static 'DNA.svg' %}" alt="Chloroplast icon">
+          <div class="usa-media-block__body">
+            <h3>{{gene_count}} Gene Annotations</h3>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="padding-top-2" style="max-width:50%;margin:0 auto;">
       {{ total_histogram|safe }}
     </div>

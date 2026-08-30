@@ -3,17 +3,20 @@ from .services import build_metadata_queryset
 from random import choice
 from apps.inverted_repeats.models import IR_Identification
 from apps.organelle_quality.models import OrganelleMetadata
-from datetime import date
+from apps.taxonomy.models import TaxonomyData
+from datetime import datetime
 import polars as pl
 from django.db.models import Q
 from django.http import HttpResponse, JsonResponse
 import plotly.express as px
 from django.core.cache import cache
+from django.db.models import Sum
 
 """
 Names for the columns from left to right for main table:
 Django database, Download headers, HTML Display
 """
+
 RESULT_COLUMNS = [
     ("accession", "Accession", "Accession"),
     ("title", "Title", "Title"),
@@ -23,7 +26,11 @@ RESULT_COLUMNS = [
     ("t_rnas_reported", "TRNAs_Reported", "N tRNAs"),
     ("gc_content", "GC_Content", "GC"),
     ("ambiguity_content", "Ambiguity_Content", "N ambig."),
-    ("longest_ambiguity_stretch", "Longest_Ambiguity_Stretch", "Longest ambig. stretch"),
+    (
+        "longest_ambiguity_stretch",
+        "Longest_Ambiguity_Stretch",
+        "Longest ambig. stretch",
+    ),
     ("gene_count", "Gene_Count", "N genes"),
 ]
 
@@ -31,6 +38,7 @@ RESULT_COLUMNS = [
 Same thing for our chloroplast values:
 Django database, Download headers, HTML Display
 """
+
 IR_RESULT_COLUMNS = [
     ("accession", "Accession", "Accession"),
     ("ira_reported", "IRa_Reported", "IRa Reported"),
@@ -57,16 +65,27 @@ IR_RESULTS_COLUMN_LABELS = {col[1]: col[2] for col in IR_RESULT_COLUMNS}
 
 # Only these are worth matching against free-text search input - the rest
 # are numbers/dates nobody meaningfully searches by typing text.
+
 SEARCHABLE_FIELDS = ["accession", "title"]
 
 DOWNLOAD_FIELDS = [
-    "accession", "title", "base_pair_length", "updated",
-    "ambiguity_content", "longest_ambiguity_stretch", "gc_content", "r_rnas_reported",
-    "t_rnas_reported", "gene_count", "gene_list",
+    "accession",
+    "title",
+    "base_pair_length",
+    "updated",
+    "ambiguity_content",
+    "longest_ambiguity_stretch",
+    "gc_content",
+    "r_rnas_reported",
+    "t_rnas_reported",
+    "gene_count",
+    "gene_list",
 ]
 
 
 # Deal with filters.
+
+
 def _int_param(value, default):
     try:
         return int(value)
@@ -74,7 +93,7 @@ def _int_param(value, default):
         return default
 
 
-# Allows download button to only use searchable fields
+# Allows download button to only use searchable fields.
 
 
 def _apply_search_filter(qs, search_value, fields=SEARCHABLE_FIELDS):
@@ -87,7 +106,8 @@ def _apply_search_filter(qs, search_value, fields=SEARCHABLE_FIELDS):
     return qs.filter(search_filter)
 
 
-# Allows
+# Allows CSV exports.
+
 CSV_EXPORT_SCHEMA = {
     "accession": pl.String,
     "title": pl.String,
@@ -131,10 +151,20 @@ RECORD_INFO_EXPORT_SCHEMA = {**CSV_EXPORT_SCHEMA, **IR_EXPORT_SCHEMA}
 IR_FIELDS = list(IR_EXPORT_SCHEMA.keys())
 
 
-def create_graph(request):
+##############################################
+#
+# INDEX.HTML'S VIEW
+#
+# ############################################
 
-    # This whole part is to render a html graph. It makes a histogram for plastids,
-    # mitochondrion, and then combines them.
+
+def create_graph(request):
+    """
+    Main purpose of the function is to make a graph and
+    get certain values to display on the home page.
+    """
+
+    # Graph portion
 
     plastid_records = list(IR_Identification.objects.values("updated", "accession"))
     plastid_histogram_df = (
@@ -173,7 +203,11 @@ def create_graph(request):
         )
     else:
         plastid_histogram_df = pl.DataFrame(
-            schema={"Last Update": pl.Date, "Total Records": pl.Int64, "Type": pl.String}
+            schema={
+                "Last Update": pl.Date,
+                "Total Records": pl.Int64,
+                "Type": pl.String,
+            }
         )
 
     mito_records = list(
@@ -213,7 +247,11 @@ def create_graph(request):
         )
     else:
         mito_histogram_df = pl.DataFrame(
-            schema={"Last Update": pl.Date, "Total Records": pl.Int64, "Type": pl.String}
+            schema={
+                "Last Update": pl.Date,
+                "Total Records": pl.Int64,
+                "Type": pl.String,
+            }
         )
 
     total_df = (
@@ -270,9 +308,7 @@ def create_graph(request):
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
         xaxis=dict(range=["2015-01-01", latest_record_date or "2015-01-01"]),
-        yaxis=dict(
-            range=[0, combined_df["Total Records"].max() or 0], title="Records"
-        ),
+        yaxis=dict(range=[0, combined_df["Total Records"].max() or 0], title="Records"),
         font=dict(family="Merriweather, serif", color="black"),
         height=225,
     )
@@ -282,11 +318,39 @@ def create_graph(request):
         full_html=False, include_plotlyjs=False, config={"responsive": True}
     )
 
-    return render(request, "index.html", {"total_histogram": total_histogram})
+    ######################
+    ##### Value part #####
+    ######################
+    plastid_count = OrganelleMetadata.objects.filter(
+        organelle_type__startswith="plastid"
+    ).count()
+    taxonomy_count = TaxonomyData.objects.values("genus").distinct().count()
+    last_update = datetime.strptime(latest_record_date, "%Y-%m-%d").strftime("%B %d %Y")
+    gene_count = (
+        OrganelleMetadata.objects.aggregate(Sum("gene_count"))["gene_count__sum"] or 0
+    )
+
+    return render(
+        request,
+        "index.html",
+        {
+            "total_histogram": total_histogram,
+            "plastid_count": plastid_count,
+            "taxonomy_count": taxonomy_count,
+            "last_update": last_update,
+            "gene_count": gene_count,
+        },
+    )
+
+
+#####################################################################
 
 
 def about(request):
     return render(request, "about.html")
+
+
+#####################################################################
 
 
 def search(request):
@@ -316,7 +380,9 @@ def search(request):
 
         request.session["search_term"] = search_term
 
-        return redirect(f'/results/?q={search_term or "*"}&category={category}&organelle_type={organelle_type}')
+        return redirect(
+            f'/results/?q={search_term or "*"}&category={category}&organelle_type={organelle_type}'
+        )
 
     # For random results:
     if "random" in request.GET:
@@ -338,10 +404,12 @@ def search(request):
         category = request.GET.get("category", "")
     organelle_type = request.GET.get("organelle_type", "plastid")
 
-    total_records = build_metadata_queryset(search_term, category, organelle_type).count()
-    accessions = build_metadata_queryset(search_term, category, organelle_type).values_list(
-        "accession", flat=True
-    )
+    total_records = build_metadata_queryset(
+        search_term, category, organelle_type
+    ).count()
+    accessions = build_metadata_queryset(
+        search_term, category, organelle_type
+    ).values_list("accession", flat=True)
     has_ir_data = IR_Identification.objects.filter(accession__in=accessions).exists()
 
     columns = [
@@ -369,6 +437,9 @@ def search(request):
     )
 
 
+#####################################################################
+
+
 def results_data(request):
     # Makes it where DataTables only loads what's needed rather than entire db.
 
@@ -394,9 +465,11 @@ def results_data(request):
     if search_value:
         qs = _apply_search_filter(qs, search_value)
 
-    # Filt
+    # Filter by organelle.
 
-    filtered_cache_key = f"results_filtered:{category}:{organelle_type}:{q}:{search_value}"
+    filtered_cache_key = (
+        f"results_filtered:{category}:{organelle_type}:{q}:{search_value}"
+    )
     records_filtered = cache.get(filtered_cache_key)
     if records_filtered is None:
         records_filtered = qs.count() if search_value else records_total
@@ -431,7 +504,8 @@ def results_data(request):
             "ambiguity_content": row["ambiguity_content"],
             "longest_ambiguity_stretch": (
                 row["longest_ambiguity_stretch"]
-                if row["longest_ambiguity_stretch"] is not None else ""
+                if row["longest_ambiguity_stretch"] is not None
+                else ""
             ),
             "gene_count": row["gene_count"] if row["gene_count"] is not None else "",
         }
@@ -446,6 +520,9 @@ def results_data(request):
             "data": data,
         }
     )
+
+
+#####################################################################
 
 
 def ir_data(request):

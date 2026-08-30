@@ -115,3 +115,16 @@ Toggle Button
 #ir-table_wrapper .dt-button.dt-button--active {
     font-weight: normal;
 }
+
+/*
+Hover on media boxes.
+*/
+
+.usa-media-block {
+  transition: box-shadow 0.15s ease-in-out, transform 0.15s ease-in-out;
+}
+
+.usa-media-block:hover {
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.15); /* roughly USWDS shadow-2 */
+  transform: translateY(-2px);
+}
