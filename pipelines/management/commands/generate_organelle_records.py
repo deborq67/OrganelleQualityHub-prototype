@@ -3,7 +3,7 @@ import sys
 
 from django.core.management.base import BaseCommand
 
-from pipelines.importers.organelle_file_finder import download_mitochondrial_files, download_plastid_files
+from pipelines.analyses.organelle_file_finder import download_mitochondrial_files, download_plastid_files
 
 
 class Command(BaseCommand):
