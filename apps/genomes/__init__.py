@@ -1,1 +1,1 @@
-"""TODO: describe the genomes app's purpose."""
+"""Purpose for future updates."""

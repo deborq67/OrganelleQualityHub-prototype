@@ -5,7 +5,7 @@ from pipelines.exceptions import PipelineError
 
 
 class Command(BaseCommand):
-    help = 'One-off: backfills gene_list on existing OrganelleMetadata rows from their GenBank files.'
+    help = 'One-off: backfills gene_list and/or longest_ambiguity_stretch (pick via -o) on existing OrganelleMetadata rows from their GenBank files.'
 
     def add_arguments(self, parser):
         parser.add_argument('--workers', type=int, default=None,
@@ -14,6 +14,11 @@ class Command(BaseCommand):
                             help=f'Files per worker task (default: auto, capped at {DEFAULT_CHUNKSIZE}).')
         parser.add_argument('--limit', type=int, default=None,
                             help='Process at most N rows (useful for testing storage impact before a full run).')
+        parser.add_argument('-o', '--only', action='append', required=True,
+                            choices=['genes', 'amb_length'],
+                            help='Field to backfill: "genes" (gene_list) or "amb_length" '
+                                 '(longest_ambiguity_stretch). Repeat to backfill both: '
+                                 '-o genes -o amb_length.')
 
     def handle(self, *args, **options):
         try:

@@ -505,7 +505,7 @@ def results_data(request):
             "longest_ambiguity_stretch": (
                 row["longest_ambiguity_stretch"]
                 if row["longest_ambiguity_stretch"] is not None
-                else ""
+                else "None"
             ),
             "gene_count": row["gene_count"] if row["gene_count"] is not None else "",
         }
@@ -593,6 +593,9 @@ def ir_data(request):
             "data": data,
         }
     )
+
+
+####################################################
 
 
 def general_info(request, accession):

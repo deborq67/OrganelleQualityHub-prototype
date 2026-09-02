@@ -1,1 +1,1 @@
-"""TODO: describe the genome_maps app's purpose."""
+"""This app is responsible for recording all organelle graphs."""

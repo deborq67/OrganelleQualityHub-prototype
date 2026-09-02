@@ -14,7 +14,7 @@ python manage.py genome_upload
 
 To fill pre-existing information just use:
 
-python manage.py backfill_gene_list
+python manage.py backfill_table_columns
 
 
 
