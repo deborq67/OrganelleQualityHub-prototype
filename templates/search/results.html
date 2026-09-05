@@ -2,41 +2,33 @@
 
 {% block title %}Results for {% if search_term %}{{ search_term }}{% else %}all {{ category }}{% endif %}{% endblock %}
 
-  {% block hero %}
-    <div class="text-center">
-    <br>
-    <h3 class="margin-bottom-2">Results for {{ search_term }}</h3>
-      <h3>{{ total_records }} records found.</h3>
-        <br>
-
-        {% include "download_modal.html" with modal_id="DownloadResultsModal" label="Results" confirm_text="Are you sure you want to download Results?" download_view="download_results" %}
-
-        <script>
-          document.querySelector('[aria-controls="DownloadResultsModal"]').addEventListener('click', function () {
-            const params = new URLSearchParams({
-              q: '{{ search_term|escapejs }}',
-              category: '{{ category|escapejs }}',
-              organelle_type: '{{ organelle_type|escapejs }}',
-            });
-            const dtSearch = mainTable.search();
-            if (dtSearch) params.set('search', dtSearch);
-            const btn = document.querySelector('#DownloadResultsModal [data-download-url]');
-            btn.dataset.downloadUrl = '{% url "download_results" %}?' + params.toString();
-          });
-        </script>
+{% block content %}
+<div class="bg-accent-warm-lighter padding-top-2 padding-bottom-0">
+  <div class="grid-container">
+    <div style="font-size: 0.9rem; line-height: 1.5; color: #1b1b1b; text-align: center; margin-bottom: 1.25rem;">
+      A database of quality-assessed complete organelle genomes from GenBank, designed to facilitate the selection of high-quality records for scientific reuse.
     </div>
 
-                    <div class="grid-container text-center">
-                      <div class="padding-top-2 padding-bottom-3">
-                        {% include "search/search_bar.html" %}
-                      </div>
-                    </div>
+    {% include "search/search_bar.html" %}
 
-                    {% endblock %}
+    <div class="width-full margin-top-2 margin-bottom-1" style="background: transparent; padding-top: 0; padding-bottom: 0;">
+      <div style="border: 2px solid #c7ccd1; border-radius: 0.5rem; padding: 0.75rem 1rem; background: rgba(255,255,255,0.2); box-shadow: inset 0 0 0 1px rgba(0,0,0,0.02);">
+        <div style="font-size: 0.8rem; font-weight: 700; letter-spacing: 0.02em; text-transform: uppercase; color: #565c65; margin-bottom: 0.5rem;">Search results</div>
+        <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 2rem; row-gap: 0.35rem; font-size: 0.9rem; line-height: 1.5; font-weight: 400; color: #1b1b1b;">
+          <div>Search term: <span style="font-weight: 600; color: #1f3a5f;">{% if search_term %}{{ search_term }}{% else %}All records{% endif %}</span></div>
+          <div>Category: <span style="font-weight: 600; color: #1f3a5f;">{% if category %}{{ category }}{% else %}All{% endif %}</span></div>
+          <div>Organelle type: <span style="font-weight: 600; color: #1f3a5f;">{% if organelle_type %}{{ organelle_type|title }}{% else %}All{% endif %}</span></div>
+          <div>Records found: <span style="font-weight: 600; color: #1f3a5f;">{{ total_records_formatted }}</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
 
-                    {% block content_bottom %}
+{% block content_bottom %}
 
-                      <div class="content grid-container">
+                      <div class="content grid-container" style="margin-top: 0; padding-top: 0.5rem;">
                         <div>
                           {% if total_records %}
                             <div class="grid-row flex-justify-center">
@@ -78,7 +70,7 @@
                             <script>
                               const mainTable = new DataTable('#results-table', {
                                 serverSide: true,
-                                order: [[2, 'desc']],
+                                order: [[0, 'desc']],
                                 scrollX: true,
                                 ajax: {
                                   url: '{% url "results_data" %}',
@@ -92,18 +84,30 @@
                                   {
                                     data: 'accession',
                                     render: function (data, type, row) {
-                                      return type === 'display' ? '<a href="' + row.href + '">' + data + '</a>' : data;
+                                      if (type === 'display') {
+                                        return '<a href="' + row.href + '">' + data + '</a>' + (row.updated ? '<br><span style="font-size: 0.72rem; color: #565c65;">' + row.updated + '</span>' : '');
+                                      }
+                                      return data;
                                     }
                                   },
                                   { data: 'title' },
-                                  { data: 'updated' },
-                                  { data: 'bp_length' },
-                                  { data: 'r_rnas' },
-                                  { data: 't_rnas' },
-                                  { data: 'gc_content' },
-                                  { data: 'ambiguity_content' },
-                                  { data: 'longest_ambiguity_stretch' },
-                                  { data: 'gene_count' }
+                                  {
+                                    data: 'bp_length',
+                                    className: 'quality-col quality-col-start',
+                                    width: '9%',
+                                    render: function (data, type, row) {
+                                      if (type === 'display' && data !== null && data !== undefined && data !== '') {
+                                        return Number(data).toLocaleString();
+                                      }
+                                      return data;
+                                    }
+                                  },
+                                  { data: 'r_rnas', className: 'quality-col', width: '9%' },
+                                  { data: 't_rnas', className: 'quality-col', width: '9%' },
+                                  { data: 'gc_content', className: 'quality-col', width: '9%' },
+                                  { data: 'ambiguity_content', className: 'quality-col', width: '9%' },
+                                  { data: 'longest_ambiguity_stretch', className: 'quality-col', width: '9%' },
+                                  { data: 'gene_count', className: 'quality-col', width: '9%' }
                                 ]
                               });
 
@@ -159,6 +163,223 @@
                                 max-width: 100%;
                                 margin-left: auto;
                                 margin-right: auto;
+                              }
+
+                              /* Table base */
+                              #results-table-region table,
+                              #results-table-region table.dataTable,
+                              #results-table-region table.usa-table,
+                              #results-table,
+                              #ir-table,
+                              table.dataTable#results-table,
+                              table.dataTable#ir-table,
+                              table.usa-table#results-table,
+                              table.usa-table#ir-table {
+                                font-size: 0.775rem !important;
+                                background-color: transparent !important;
+                              }
+
+                              /* Table cells (body and general) */
+                              #results-table-region th,
+                              #results-table-region td,
+                              #results-table th,
+                              #results-table td,
+                              #ir-table th,
+                              #ir-table td,
+                              table.dataTable#results-table th,
+                              table.dataTable#results-table td,
+                              table.dataTable#ir-table th,
+                              table.dataTable#ir-table td {
+                                text-align: center !important;
+                                font-size: 0.775rem !important;
+                                padding: 0.3rem 0.45rem !important;
+                              }
+
+                              /* Quality value columns equal width */
+                              #results-table-region th.quality-col,
+                              #results-table-region td.quality-col,
+                              #results-table th.quality-col,
+                              #results-table td.quality-col,
+                              table.dataTable#results-table th.quality-col,
+                              table.dataTable#results-table td.quality-col {
+                                width: 9% !important;
+                                min-width: 80px !important;
+                                max-width: 9% !important;
+                              }
+
+                              /* Vertical line dividing metadata from quality values */
+                              #results-table-region th.quality-col-start,
+                              #results-table-region td.quality-col-start,
+                              #results-table-region .dt-scroll-head th:nth-child(3),
+                              #results-table-region .dt-scroll-body th:nth-child(3),
+                              #results-table-region .dt-scroll-body td:nth-child(3),
+                              #results-table th.quality-col-start,
+                              #results-table td.quality-col-start,
+                              #results-table th:nth-child(3),
+                              #results-table td:nth-child(3),
+                              table.dataTable#results-table th.quality-col-start,
+                              table.dataTable#results-table td.quality-col-start,
+                              table.dataTable#results-table th:nth-child(3),
+                              table.dataTable#results-table td:nth-child(3) {
+                                border-left: 1px solid #c7ccd1 !important;
+                              }
+
+                              /* Header / Title line styling for DataTables, cloned scroll headers, and USWDS tables */
+                              #results-table-region thead,
+                              #results-table-region thead tr,
+                              #results-table-region thead th,
+                              #results-table-region thead td,
+                              #results-table-region .dt-scroll-head,
+                              #results-table-region .dt-scroll-headInner,
+                              #results-table-region .dt-scroll-head table,
+                              #results-table-region .dt-scroll-head th,
+                              #results-table-region .dt-scroll-head td,
+                              #results-table-region .dt-column-header,
+                              #results-table-region .dt-column-title,
+                              .dt-container thead,
+                              .dt-container thead tr,
+                              .dt-container thead th,
+                              .dt-container thead td,
+                              .dt-container .dt-scroll-head,
+                              .dt-container .dt-scroll-headInner,
+                              .dt-container .dt-scroll-head table,
+                              .dt-container .dt-scroll-head th,
+                              .dt-container .dt-scroll-head td,
+                              .dt-container .dt-column-header,
+                              .dt-container .dt-column-title,
+                              table.dataTable thead th,
+                              table.dataTable thead td,
+                              table.dataTable thead > tr > th,
+                              table.dataTable thead > tr > td,
+                              table.usa-table thead th,
+                              table.usa-table thead td {
+                                font-size: 0.775rem !important;
+                                font-weight: 700 !important;
+                                background-color: rgba(0, 0, 0, 0.04) !important;
+                                border-bottom: 1px solid #c7ccd1 !important;
+                                color: #374151 !important;
+                              }
+
+                              #results-table-region .dt-scroll-head,
+                              #results-table-region .dt-scroll-headInner,
+                              #results-table-region .dt-scroll-head table,
+                              .dt-container .dt-scroll-head,
+                              .dt-container .dt-scroll-headInner,
+                              .dt-container .dt-scroll-head table {
+                                background: transparent !important;
+                                background-color: transparent !important;
+                              }
+
+                              /* Transparent & Translucent slight-gray striping */
+                              #results-table-region tbody tr,
+                              #results-table-region tbody td,
+                              #results-table tbody tr,
+                              #ir-table tbody tr,
+                              #results-table tbody td,
+                              #ir-table tbody td,
+                              table.dataTable#results-table tbody tr,
+                              table.dataTable#ir-table tbody tr,
+                              table.dataTable#results-table tbody td,
+                              table.dataTable#ir-table tbody td {
+                                background-color: transparent !important;
+                              }
+
+                              #results-table-region tbody tr:nth-child(even),
+                              #results-table-region tbody tr:nth-child(even) td,
+                              #results-table tbody tr:nth-child(even),
+                              #ir-table tbody tr:nth-child(even),
+                              #results-table.usa-table--striped tbody tr:nth-child(2n),
+                              #ir-table.usa-table--striped tbody tr:nth-child(2n),
+                              #results-table.usa-table--striped tbody tr:nth-child(2n) td,
+                              #ir-table.usa-table--striped tbody tr:nth-child(2n) td,
+                              table.dataTable.display > tbody > tr:nth-child(even),
+                              table.dataTable.stripe > tbody > tr:nth-child(even),
+                              table.dataTable.display > tbody > tr:nth-child(even) > *,
+                              table.dataTable.stripe > tbody > tr:nth-child(even) > *,
+                              table.dataTable tbody tr.even,
+                              table.dataTable tbody tr.even > td {
+                                background-color: rgba(0, 0, 0, 0.035) !important;
+                              }
+
+                              #results-table-region tbody tr:nth-child(odd),
+                              #results-table-region tbody tr:nth-child(odd) td,
+                              #results-table tbody tr:nth-child(odd),
+                              #ir-table tbody tr:nth-child(odd),
+                              #results-table.usa-table--striped tbody tr:nth-child(2n+1),
+                              #ir-table.usa-table--striped tbody tr:nth-child(2n+1),
+                              #results-table.usa-table--striped tbody tr:nth-child(2n+1) td,
+                              #ir-table.usa-table--striped tbody tr:nth-child(2n+1) td,
+                              table.dataTable.display > tbody > tr:nth-child(odd),
+                              table.dataTable.stripe > tbody > tr:nth-child(odd),
+                              table.dataTable.display > tbody > tr:nth-child(odd) > *,
+                              table.dataTable.stripe > tbody > tr:nth-child(odd) > *,
+                              table.dataTable tbody tr.odd,
+                              table.dataTable tbody tr.odd > td {
+                                background-color: transparent !important;
+                              }
+
+                              #results-table-region tbody tr:hover,
+                              #results-table-region tbody tr:hover td,
+                              #results-table tbody tr:hover,
+                              #ir-table tbody tr:hover,
+                              #results-table tbody tr:hover td,
+                              #ir-table tbody tr:hover td,
+                              table.dataTable.hover > tbody > tr:hover,
+                              table.dataTable.hover > tbody > tr:hover > *,
+                              table.dataTable tbody tr:hover,
+                              table.dataTable tbody tr:hover > td {
+                                background-color: rgba(0, 0, 0, 0.065) !important;
+                              }
+
+                              #results-table_wrapper,
+                              #ir-table_wrapper,
+                              .dt-container {
+                                font-size: 0.825rem;
+                              }
+
+                              #results-table_wrapper .dt-info,
+                              #results-table_wrapper .dt-paging,
+                              #results-table_wrapper .dt-search,
+                              #results-table_wrapper .dt-length,
+                              #ir-table_wrapper .dt-info,
+                              #ir-table_wrapper .dt-paging,
+                              #ir-table_wrapper .dt-search,
+                              #ir-table_wrapper .dt-length,
+                              .dt-container .dt-info,
+                              .dt-container .dt-paging,
+                              .dt-container .dt-search,
+                              .dt-container .dt-length {
+                                font-size: 0.8rem;
+                              }
+
+                              #results-table_wrapper .dt-input,
+                              #ir-table_wrapper .dt-input,
+                              .dt-container .dt-input {
+                                background-color: rgba(255, 255, 255, 0.35) !important;
+                                border: 1px solid #c7ccd1 !important;
+                              }
+
+                              #results-table_wrapper .dt-paging-button,
+                              #ir-table_wrapper .dt-paging-button,
+                              .dt-container .dt-paging-button {
+                                background-color: rgba(255, 255, 255, 0.25) !important;
+                                color: #1b1b1b !important;
+                                border: 1px solid #c7ccd1 !important;
+                              }
+
+                              #results-table_wrapper .dt-paging-button.disabled,
+                              #ir-table_wrapper .dt-paging-button.disabled,
+                              .dt-container .dt-paging-button.disabled {
+                                border: none;
+                              }
+
+                              #results-table_wrapper .dt-paging-button.current,
+                              #ir-table_wrapper .dt-paging-button.current,
+                              .dt-container .dt-paging-button.current {
+                                font-weight: bold;
+                                border-width: 1px !important;
+                                border-color: #757575 !important;
+                                background-color: rgba(0, 0, 0, 0.06) !important;
                               }
                             </style>
                           {% else %}

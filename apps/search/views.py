@@ -20,18 +20,17 @@ Django database, Download headers, HTML Display
 RESULT_COLUMNS = [
     ("accession", "Accession", "Accession"),
     ("title", "Title", "Title"),
-    ("updated", "Updated", "Updated"),
-    ("base_pair_length", "BP_Length", "Base Pair Length"),
-    ("r_rnas_reported", "RRNAs_Reported", "N rRNAs"),
-    ("t_rnas_reported", "TRNAs_Reported", "N tRNAs"),
-    ("gc_content", "GC_Content", "GC"),
-    ("ambiguity_content", "Ambiguity_Content", "N ambig."),
+    ("base_pair_length", "BP_Length", "Length (bp)"),
+    ("r_rnas_reported", "RRNAs_Reported", "rRNAs"),
+    ("t_rnas_reported", "TRNAs_Reported", "tRNAs"),
+    ("gc_content", "GC_Content", "GC (%)"),
+    ("ambiguity_content", "Ambiguity_Content", "Ambig. bases"),
     (
         "longest_ambiguity_stretch",
         "Longest_Ambiguity_Stretch",
-        "Longest ambig. stretch",
+        "Max ambig. run",
     ),
-    ("gene_count", "Gene_Count", "N genes"),
+    ("gene_count", "Gene_Count", "Genes"),
 ]
 
 """
@@ -254,68 +253,15 @@ def create_graph(request):
             }
         )
 
-    total_df = (
-        mito_histogram_df.select(["Last Update", "Total Records"])
-        .join(
-            plastid_histogram_df.select(["Last Update", "Total Records"]),
-            on="Last Update",
-            how="full",
-            coalesce=True,
+    latest_record_date = (
+        pl.concat(
+            [
+                mito_histogram_df.select("Last Update"),
+                plastid_histogram_df.select("Last Update"),
+            ]
         )
-        .sort("Last Update")
-        .with_columns(
-            pl.col("Total Records").forward_fill().fill_null(0),
-            pl.col("Total Records_right").forward_fill().fill_null(0),
-        )
-        .with_columns(
-            (pl.col("Total Records") + pl.col("Total Records_right")).alias(
-                "Total Records"
-            )
-        )
-        .select(["Last Update", "Total Records"])
-        .with_columns(pl.lit("Total").alias("Type"))
-    )
-
-    cols = ["Last Update", "Total Records", "Type"]
-    combined_df = pl.concat(
-        [
-            total_df.select(cols),
-            mito_histogram_df.select(cols),
-            plastid_histogram_df.select(cols),
-        ]
-    )
-
-    total_histogram = px.bar(
-        combined_df,
-        x="Last Update",
-        y="Total Records",
-        color="Type",
-        category_orders={"Type": ["Total", "Mitochondrion", "Plastid"]},
-        color_discrete_map={
-            "Plastid": "forestgreen",
-            "Mitochondrion": "yellow",
-            "Total": "purple",
-        },
-        title="Total Annotated Records Uploaded to GenBank Over Time",
-        template="none",
-    )
-    latest_record_date = combined_df.select(
-        pl.col("Last Update").max().dt.strftime("%Y-%m-%d")
-    ).item()
-
-    total_histogram.update_layout(
-        barmode="overlay",
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(0,0,0,0)",
-        xaxis=dict(range=["2015-01-01", latest_record_date or "2015-01-01"]),
-        yaxis=dict(range=[0, combined_df["Total Records"].max() or 0], title="Records"),
-        font=dict(family="Merriweather, serif", color="black"),
-        height=225,
-    )
-    total_histogram.update_traces(marker_opacity=1.0)
-
-    total_histogram = total_histogram.to_html(
-        full_html=False, include_plotlyjs=False, config={"responsive": True}
+        .select(pl.col("Last Update").max())
+        .item()
     )
 
     ######################
@@ -324,21 +270,47 @@ def create_graph(request):
     plastid_count = OrganelleMetadata.objects.filter(
         organelle_type__startswith="plastid"
     ).count()
+    mitochondrion_count = OrganelleMetadata.objects.filter(
+        organelle_type__startswith="mitochondrion"
+    ).count()
     taxonomy_count = TaxonomyData.objects.values("genus").distinct().count()
-    last_update = datetime.strptime(latest_record_date, "%Y-%m-%d").strftime("%B %d %Y")
+    species_count = (
+        TaxonomyData.objects.exclude(species="")
+        .exclude(species__isnull=True)
+        .values("species")
+        .distinct()
+        .count()
+    )
+    last_update = (
+        latest_record_date.strftime("%B %d %Y")
+        if latest_record_date is not None
+        else "N/A"
+    )
     gene_count = (
         OrganelleMetadata.objects.aggregate(Sum("gene_count"))["gene_count__sum"] or 0
     )
+    ir_reported_count = IR_Identification.objects.filter(ir_reported="yes").count()
+    plastid_count_formatted = f"{plastid_count:,}"
+    mitochondrion_count_formatted = f"{mitochondrion_count:,}"
+    taxonomy_count_formatted = f"{taxonomy_count:,}"
+    species_count_formatted = f"{species_count:,}"
+    gene_count_formatted = f"{gene_count:,}"
+    ir_reported_count_formatted = f"{ir_reported_count:,}"
 
     return render(
         request,
         "index.html",
         {
-            "total_histogram": total_histogram,
             "plastid_count": plastid_count,
             "taxonomy_count": taxonomy_count,
             "last_update": last_update,
             "gene_count": gene_count,
+            "plastid_count_formatted": plastid_count_formatted,
+            "mitochondrion_count_formatted": mitochondrion_count_formatted,
+            "taxonomy_count_formatted": taxonomy_count_formatted,
+            "species_count_formatted": species_count_formatted,
+            "gene_count_formatted": gene_count_formatted,
+            "ir_reported_count_formatted": ir_reported_count_formatted,
         },
     )
 
@@ -375,6 +347,7 @@ def search(request):
                     "search_term": search_term,
                     "results": [],
                     "total_records": 0,
+                    "total_records_formatted": "0",
                 },
             )
 
@@ -407,6 +380,7 @@ def search(request):
     total_records = build_metadata_queryset(
         search_term, category, organelle_type
     ).count()
+    total_records_formatted = f"{total_records:,}"
     accessions = build_metadata_queryset(
         search_term, category, organelle_type
     ).values_list("accession", flat=True)
@@ -430,6 +404,7 @@ def search(request):
             "category": category,
             "organelle_type": organelle_type,
             "total_records": total_records,
+            "total_records_formatted": total_records_formatted,
             "columns": columns,
             "ir_columns": ir_columns,
             "has_ir_data": has_ir_data,
@@ -483,7 +458,8 @@ def results_data(request):
         order_field = f"-{order_field}"
 
     length = length if length > 0 else records_filtered or 1
-    page = qs.order_by(order_field)[start : start + length].values(*RESULTS_DATA_FIELDS)
+    fetch_fields = list(dict.fromkeys(RESULTS_DATA_FIELDS + ["updated"]))
+    page = qs.order_by(order_field)[start : start + length].values(*fetch_fields)
 
     data = [
         {

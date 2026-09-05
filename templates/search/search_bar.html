@@ -2,30 +2,39 @@
       <div class="tablet:grid-col-10">
         <form method="POST" action="{% url 'search' %}">
           {% csrf_token %}
-          <div class="input-group display-flex flex-column flex-align-center">
-            <div class="input-group display-flex flex-row flex-align-center width-full">
-              <select class="usa-select search-category flex-1" name="category" aria-label="Search category">
-                <option>Genus and Species</option>
-                <option>Family</option>
-                <option>Order</option>
-                <option>Gene</option>
-              </select>
-              <input class="usa-input flex-4" style="max-width: none;" type="text" name="search_term" placeholder="Search organelle." aria-label="Search" required>
-            </div>
-            <div class="usa-button-group margin-top-2" role="radiogroup" aria-label="Organelle type">
-              <div class="usa-radio">
-                <input class="usa-radio__input usa-radio__input--tile" id="organelle-plastid" type="radio" name="organelle_type" value="plastid" {% if organelle_type != "mitochondrion" %}checked{% endif %}>
-                <label class="usa-radio__label" for="organelle-plastid">Plastids</label>
+          <div style="border: 2px solid #c7ccd1; border-radius: 0.5rem; padding: 0.75rem 1rem; background: rgba(255,255,255,0.15); box-shadow: inset 0 0 0 1px rgba(0,0,0,0.02);">
+            <div style="font-size: 0.8rem; font-weight: 700; letter-spacing: 0.02em; text-transform: uppercase; color: #565c65; margin-bottom: 0.5rem;">Search field</div>
+            <div class="input-group display-flex flex-column flex-align-center">
+              <div class="input-group display-flex flex-row width-full" style="gap: 0.5rem; align-items: stretch;">
+                <select class="usa-select search-category flex-1" name="category" aria-label="Search category" style="height: 2.5rem; margin: 0; align-self: stretch; display: flex; align-items: center;">
+                  <option>Genus and Species</option>
+                  <option>Family</option>
+                  <option>Order</option>
+                  <option>Gene</option>
+                </select>
+                <input class="usa-input flex-4" style="max-width: none; margin: 0; height: 2.5rem; align-self: stretch;" type="text" name="search_term" placeholder="Search organelle." aria-label="Search" required>
+                <button class="usa-button margin-0" style="height: 2.5rem; align-self: stretch; display: flex; align-items: center; justify-content: center;" type="submit">
+                  Search
+                </button>
               </div>
-              <div class="usa-radio">
-                <input class="usa-radio__input usa-radio__input--tile" id="organelle-mitochondrion" type="radio" name="organelle_type" value="mitochondrion" {% if organelle_type == "mitochondrion" %}checked{% endif %}>
-                <label class="usa-radio__label" for="organelle-mitochondrion">Mitochondria</label>
+              <div class="usa-button-group margin-top-2" role="radiogroup" aria-label="Organelle type" style="font-size: 0.875rem;">
+                <div class="usa-radio" style="font-size: 0.875rem;">
+                  <input class="usa-radio__input usa-radio__input--tile" id="organelle-plastid" type="radio" name="organelle_type" value="plastid" {% if organelle_type != "mitochondrion" %}checked{% endif %}>
+                  <label class="usa-radio__label" for="organelle-plastid" style="font-size: 0.875rem;">Plastids</label>
+                </div>
+                <div class="usa-radio" style="font-size: 0.875rem;">
+                  <input class="usa-radio__input usa-radio__input--tile" id="organelle-mitochondrion" type="radio" name="organelle_type" value="mitochondrion" {% if organelle_type == "mitochondrion" %}checked{% endif %}>
+                  <label class="usa-radio__label" for="organelle-mitochondrion" style="font-size: 0.875rem;">Mitochondria</label>
+                </div>
+              </div>
+              <div style="width: 100%; margin-top: 0.75rem; padding-top: 0.5rem; border-top: 1px solid #d9d9d4; display: flex; flex-wrap: wrap; gap: 0.5rem 0.75rem; justify-content: center; align-items: center; font-size: 0.8rem; color: #374151;">
+                <span style="font-weight: 600; color: #4b5563;">Featured search examples:</span>
+                <a href="/results/?q=Homo sapiens&organelle_type=mitochondrion" style="color: #2c4e6f; text-decoration: underline;">Human mitochondrion</a>
+                <a href="/results/?q=Magnoliopsida&category=&organelle_type=plastid" style="color: #2c4e6f; text-decoration: underline;">Chloroplasts of flowering plants</a>
+                <a href="/results/?random=1&organelle=plastid" style="color: #2c4e6f; text-decoration: underline;">Random plastid</a>
               </div>
             </div>
-              <button class="usa-button margin-top-4 margin-bottom-4" type="submit">
-                Search
-              </button>
-            </div>
+          </div>
           </form>
         </div>
       </div>

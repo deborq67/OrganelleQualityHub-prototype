@@ -1,7 +1,13 @@
+body {
+    background: #f2e4d4;
+    color: #1b1b1b;
+}
+
 #header{
     height: 11vh; 
     position: relative;
     z-index: 10;
+    background-color: #f2e4d4 !important;
 }
 
 #header .usa-logo {
@@ -32,32 +38,197 @@
     float: none;
 }
 
+#results-table,
+#ir-table,
+#results-table-region table,
+#results-table-region table.dataTable,
+#results-table-region table.usa-table,
+table.dataTable#results-table,
+table.dataTable#ir-table,
+table.usa-table#results-table,
+table.usa-table#ir-table {
+    font-size: 0.775rem !important;
+    background-color: transparent !important;
+}
+
 #results-table th,
 #results-table td,
 #ir-table th,
-#ir-table td {
-    text-align: center;
+#ir-table td,
+#results-table-region th,
+#results-table-region td,
+table.dataTable#results-table th,
+table.dataTable#results-table td,
+table.dataTable#ir-table th,
+table.dataTable#ir-table td {
+    text-align: center !important;
+    font-size: 0.775rem !important;
+    padding: 0.3rem 0.45rem !important;
 }
 
+/* Quality value columns equal width */
+#results-table-region th.quality-col,
+#results-table-region td.quality-col,
+#results-table th.quality-col,
+#results-table td.quality-col,
+table.dataTable#results-table th.quality-col,
+table.dataTable#results-table td.quality-col {
+    width: 9% !important;
+    min-width: 80px !important;
+    max-width: 9% !important;
+}
+
+/* Vertical line dividing metadata from quality values */
+#results-table-region th.quality-col-start,
+#results-table-region td.quality-col-start,
+#results-table-region .dt-scroll-head th:nth-child(3),
+#results-table-region .dt-scroll-body th:nth-child(3),
+#results-table-region .dt-scroll-body td:nth-child(3),
+#results-table th.quality-col-start,
+#results-table td.quality-col-start,
+#results-table th:nth-child(3),
+#results-table td:nth-child(3),
+table.dataTable#results-table th.quality-col-start,
+table.dataTable#results-table td.quality-col-start,
+table.dataTable#results-table th:nth-child(3),
+table.dataTable#results-table td:nth-child(3) {
+    border-left: 1px solid #c7ccd1 !important;
+}
+
+#results-table thead th,
+#ir-table thead th,
+#results-table-region thead,
+#results-table-region thead tr,
+#results-table-region thead th,
+#results-table-region thead td,
+#results-table-region .dt-scroll-head,
+#results-table-region .dt-scroll-headInner,
+#results-table-region .dt-scroll-head table,
+#results-table-region .dt-scroll-head th,
+#results-table-region .dt-scroll-head td,
+#results-table-region .dt-column-header,
+#results-table-region .dt-column-title,
+.dt-container thead,
+.dt-container thead tr,
+.dt-container thead th,
+.dt-container thead td,
+.dt-container .dt-scroll-head,
+.dt-container .dt-scroll-headInner,
+.dt-container .dt-scroll-head table,
+.dt-container .dt-scroll-head th,
+.dt-container .dt-scroll-head td,
+.dt-container .dt-column-header,
+.dt-container .dt-column-title,
+table.dataTable thead th,
+table.dataTable thead td,
+table.dataTable thead > tr > th,
+table.dataTable thead > tr > td,
+table.usa-table thead th,
+table.usa-table thead td {
+    font-size: 0.775rem !important;
+    font-weight: 700 !important;
+    background-color: rgba(0, 0, 0, 0.04) !important;
+    border-bottom: 1px solid #c7ccd1 !important;
+    color: #374151 !important;
+}
+
+#results-table-region .dt-scroll-head,
+#results-table-region .dt-scroll-headInner,
+#results-table-region .dt-scroll-head table,
+.dt-container .dt-scroll-head,
+.dt-container .dt-scroll-headInner,
+.dt-container .dt-scroll-head table {
+    background: transparent !important;
+    background-color: transparent !important;
+}
+
+#results-table tbody tr,
+#ir-table tbody tr,
+#results-table tbody td,
+#ir-table tbody td,
+table.dataTable#results-table tbody tr,
+table.dataTable#ir-table tbody tr,
+table.dataTable#results-table tbody td,
+table.dataTable#ir-table tbody td {
+    background-color: transparent !important;
+}
+
+#results-table tbody tr:nth-child(even),
+#ir-table tbody tr:nth-child(even),
+#results-table.usa-table--striped tbody tr:nth-child(2n),
+#ir-table.usa-table--striped tbody tr:nth-child(2n),
+#results-table.usa-table--striped tbody tr:nth-child(2n) td,
+#ir-table.usa-table--striped tbody tr:nth-child(2n) td,
+table.dataTable.display > tbody > tr:nth-child(even),
+table.dataTable.stripe > tbody > tr:nth-child(even),
+table.dataTable.display > tbody > tr:nth-child(even) > *,
+table.dataTable.stripe > tbody > tr:nth-child(even) > *,
+table.dataTable tbody tr.even,
+table.dataTable tbody tr.even > td {
+    background-color: rgba(0, 0, 0, 0.035) !important;
+}
+
+#results-table tbody tr:nth-child(odd),
+#ir-table tbody tr:nth-child(odd),
+#results-table.usa-table--striped tbody tr:nth-child(2n+1),
+#ir-table.usa-table--striped tbody tr:nth-child(2n+1),
+#results-table.usa-table--striped tbody tr:nth-child(2n+1) td,
+#ir-table.usa-table--striped tbody tr:nth-child(2n+1) td,
+table.dataTable.display > tbody > tr:nth-child(odd),
+table.dataTable.stripe > tbody > tr:nth-child(odd),
+table.dataTable.display > tbody > tr:nth-child(odd) > *,
+table.dataTable.stripe > tbody > tr:nth-child(odd) > *,
+table.dataTable tbody tr.odd,
+table.dataTable tbody tr.odd > td {
+    background-color: transparent !important;
+}
+
+#results-table tbody tr:hover,
+#ir-table tbody tr:hover,
+#results-table tbody tr:hover td,
+#ir-table tbody tr:hover td,
+table.dataTable.hover > tbody > tr:hover,
+table.dataTable.hover > tbody > tr:hover > *,
+table.dataTable tbody tr:hover,
+table.dataTable tbody tr:hover > td {
+    background-color: rgba(0, 0, 0, 0.065) !important;
+}
+
+#results-table_wrapper,
+#ir-table_wrapper {
+    font-size: 0.825rem;
+}
+
+#results-table_wrapper .dt-info,
+#results-table_wrapper .dt-paging,
+#results-table_wrapper .dt-search,
+#results-table_wrapper .dt-length,
+#ir-table_wrapper .dt-info,
+#ir-table_wrapper .dt-paging,
+#ir-table_wrapper .dt-search,
+#ir-table_wrapper .dt-length {
+    font-size: 0.8rem;
+}
 
 /*
-Keeps inputs white.
+Translucent inputs
 */
 
 #results-table_wrapper .dt-input,
 #ir-table_wrapper .dt-input {
-    background-color: white;
+    background-color: rgba(255, 255, 255, 0.35) !important;
+    border: 1px solid #c7ccd1 !important;
 }
 
 /*
-Keeps footer from cutting off color.
+Translucent paging buttons
 */
 
 #results-table_wrapper .dt-paging-button,
 #ir-table_wrapper .dt-paging-button {
-    background-color: rgba(255, 255, 255, 0.25);
-    color: black;
-    border: 1px solid gray;
+    background-color: rgba(255, 255, 255, 0.25) !important;
+    color: #1b1b1b !important;
+    border: 1px solid #c7ccd1 !important;
 }
 
 /*
@@ -72,16 +243,39 @@ Don't show border when arrows disabled.
 #results-table_wrapper .dt-paging-button.current,
 #ir-table_wrapper .dt-paging-button.current {
     font-weight: bold;
-    border-width: 2px;
-    border-color: black;
+    border-width: 1px !important;
+    border-color: #757575 !important;
+    background-color: rgba(0, 0, 0, 0.06) !important;
 }
 
 /*
 Keeps footer from cutting off color.
 */
 
+#wrapper {
+    background-color: #f2e4d4 !important;
+}
+
+.bg-accent-warm-lighter {
+    background-color: #f2e4d4 !important;
+}
+
 #footer {
     padding-bottom: 1px;
+    background: #e8d9c7 !important;
+    border-top: 1px solid #d4c2ae;
+}
+
+.usa-button,
+.usa-button:hover,
+.usa-button:focus {
+    background-color: #2c4e6f;
+    border-color: #2c4e6f;
+}
+
+.usa-button:hover,
+.usa-button:focus {
+    filter: brightness(0.97);
 }
 
 /*
@@ -103,17 +297,15 @@ Orients all arrows to the left.
 Toggle Button
 */
 
-
 #ir-table_wrapper .dt-button {
-    background-color: white;
-}
-
-#ir-table_wrapper .dt-button {
+    background-color: rgba(255, 255, 255, 0.35) !important;
+    border: 1px solid #c7ccd1 !important;
     font-weight: bold;
 }
 
 #ir-table_wrapper .dt-button.dt-button--active {
     font-weight: normal;
+    background-color: rgba(0, 0, 0, 0.06) !important;
 }
 
 /*
