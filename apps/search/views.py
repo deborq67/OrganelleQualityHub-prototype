@@ -21,8 +21,6 @@ RESULT_COLUMNS = [
     ("accession", "Accession", "Accession"),
     ("title", "Title", "Title"),
     ("base_pair_length", "BP_Length", "Length (bp)"),
-    ("r_rnas_reported", "RRNAs_Reported", "rRNAs"),
-    ("t_rnas_reported", "TRNAs_Reported", "tRNAs"),
     ("gc_content", "GC_Content", "GC (%)"),
     ("ambiguity_content", "Ambiguity_Content", "Ambig. bases"),
     (
@@ -30,7 +28,9 @@ RESULT_COLUMNS = [
         "Longest_Ambiguity_Stretch",
         "Max ambig. run",
     ),
-    ("gene_count", "Gene_Count", "Genes"),
+    ("ir_annotated", "IR_Annotated", "IRs annotated"),
+    ("ir_lengths", "IR_Lengths", "IR lengths"),
+    ("ir_equal", "IR_Equal", "IRs equal"),
 ]
 
 """
@@ -450,43 +450,87 @@ def results_data(request):
         records_filtered = qs.count() if search_value else records_total
         cache.set(filtered_cache_key, records_filtered, timeout=3600)
 
+    valid_order_fields = {
+        "accession",
+        "title",
+        "base_pair_length",
+        "gc_content",
+        "ambiguity_content",
+        "longest_ambiguity_stretch",
+        "updated",
+    }
     if 0 <= order_col_index < len(RESULTS_DATA_FIELDS):
-        order_field = RESULTS_DATA_FIELDS[order_col_index]
+        candidate_field = RESULTS_DATA_FIELDS[order_col_index]
+        order_field = candidate_field if candidate_field in valid_order_fields else "updated"
     else:
         order_field = "updated"
     if order_dir == "desc":
         order_field = f"-{order_field}"
 
     length = length if length > 0 else records_filtered or 1
-    fetch_fields = list(dict.fromkeys(RESULTS_DATA_FIELDS + ["updated"]))
-    page = qs.order_by(order_field)[start : start + length].values(*fetch_fields)
-
-    data = [
-        {
-            "accession": row["accession"],
-            "href": f'https://www.ncbi.nlm.nih.gov/nuccore/{row["accession"]}',
-            "title": row["title"] or "",
-            "updated": row["updated"].strftime("%Y/%m/%d") if row["updated"] else "",
-            "bp_length": (
-                row["base_pair_length"] if row["base_pair_length"] is not None else ""
-            ),
-            "r_rnas": (
-                row["r_rnas_reported"] if row["r_rnas_reported"] is not None else ""
-            ),
-            "t_rnas": (
-                row["t_rnas_reported"] if row["t_rnas_reported"] is not None else ""
-            ),
-            "gc_content": row["gc_content"],
-            "ambiguity_content": row["ambiguity_content"],
-            "longest_ambiguity_stretch": (
-                row["longest_ambiguity_stretch"]
-                if row["longest_ambiguity_stretch"] is not None
-                else "None"
-            ),
-            "gene_count": row["gene_count"] if row["gene_count"] is not None else "",
-        }
-        for row in page
+    fetch_fields = [
+        "accession",
+        "title",
+        "organelle_type",
+        "base_pair_length",
+        "gc_content",
+        "ambiguity_content",
+        "longest_ambiguity_stretch",
+        "updated",
     ]
+    page = list(qs.order_by(order_field)[start : start + length].values(*fetch_fields))
+    page_accessions = [row["accession"] for row in page]
+    ir_map = {
+        ir.accession: ir
+        for ir in IR_Identification.objects.filter(accession__in=page_accessions)
+    }
+
+    data = []
+    for row in page:
+        acc = row["accession"]
+        row_organelle_type = row.get("organelle_type") or ""
+        is_mito = row_organelle_type.startswith("mitochondrion") or organelle_type == "mitochondrion"
+        if is_mito:
+            ir_annotated = "n/a"
+            ir_lengths = "n/a"
+            ir_equal = "n/a"
+        else:
+            ir_obj = ir_map.get(acc)
+            if ir_obj and ir_obj.ir_reported == "yes":
+                ir_annotated = "yes"
+                len_a = f"{ir_obj.ira_reported_length:,}" if ir_obj.ira_reported_length is not None else "-"
+                len_b = f"{ir_obj.irb_reported_length:,}" if ir_obj.irb_reported_length is not None else "-"
+                ir_lengths = f"{len_a}, {len_b}"
+                if ir_obj.ira_reported_length is not None and ir_obj.irb_reported_length is not None:
+                    ir_equal = "yes" if ir_obj.ira_reported_length == ir_obj.irb_reported_length else "no"
+                else:
+                    ir_equal = "-"
+            else:
+                ir_annotated = "no"
+                ir_lengths = "-"
+                ir_equal = "-"
+
+        data.append(
+            {
+                "accession": row["accession"],
+                "href": f'https://www.ncbi.nlm.nih.gov/nuccore/{row["accession"]}',
+                "title": row["title"] or "",
+                "updated": row["updated"].strftime("%Y/%m/%d") if row["updated"] else "",
+                "bp_length": (
+                    row["base_pair_length"] if row["base_pair_length"] is not None else ""
+                ),
+                "gc_content": row["gc_content"],
+                "ambiguity_content": row["ambiguity_content"],
+                "longest_ambiguity_stretch": (
+                    row["longest_ambiguity_stretch"]
+                    if row["longest_ambiguity_stretch"] is not None
+                    else "None"
+                ),
+                "ir_annotated": ir_annotated,
+                "ir_lengths": ir_lengths,
+                "ir_equal": ir_equal,
+            }
+        )
 
     return JsonResponse(
         {
