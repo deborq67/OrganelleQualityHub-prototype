@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.urls import path
+from django.urls import include, path
 from apps.search.views import (
     search,
     results_data,
@@ -13,6 +13,7 @@ from apps.search.views import (
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    # path("api/", include("apps.api.urls")),  # not live on production yet
     path("", create_graph, name="index"),
     path("results/", search, name="search"),
     path("results/data/", results_data, name="results_data"),

@@ -13,6 +13,7 @@ cycler==0.12.1
 deprecation==2.1.0
 diff-match-patch==20241021
 Django==6.0.4
+djangorestframework==3.18.1
 django-import-export==4.4.0
 django-pandas==0.6.7
 django-unfold==0.90.0

@@ -1,6 +1,19 @@
 body {
     background: #f2e4d4;
     color: #1b1b1b;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+#wrapper {
+    display: flex;
+    flex-direction: column;
+    flex: 1 0 auto;
+}
+
+#main-content {
+    flex: 1 0 auto;
 }
 
 #header{
@@ -276,6 +289,22 @@ Keeps footer from cutting off color.
 .usa-button:hover,
 .usa-button:focus {
     filter: brightness(0.97);
+}
+
+.usa-button-group[role="radiogroup"],
+.usa-button-group[role="radiogroup"] .usa-radio {
+    background-color: #f2e4d4;
+    gap: 2rem;
+}
+
+.usa-radio__input--tile+[class*="__label"] {
+    background-color: #f2e4d4;
+    border-color: #c7ac8b;
+}
+
+.usa-radio__input--tile:checked+[class*="__label"] {
+    background-color: #e8d9c7;
+    border-color: #c7ac8b;
 }
 
 /*
