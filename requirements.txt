@@ -2,6 +2,7 @@ annotated-types==0.7.0
 anyio==4.14.1
 asgiref==3.11.1
 biopython==1.87
+black==26.5.1
 certifi==2026.6.17
 cffi==2.0.0
 click==8.3.3
@@ -13,13 +14,14 @@ cycler==0.12.1
 deprecation==2.1.0
 diff-match-patch==20241021
 Django==6.0.4
-djangorestframework==3.18.1
 django-import-export==4.4.0
 django-pandas==0.6.7
 django-unfold==0.90.0
+djangorestframework==3.18.1
 dotenv==0.9.9
 fonttools==4.63.0
 fsspec==2026.3.0
+greenlet==3.5.4
 gunicorn==26.0.0
 h11==0.16.0
 h2==4.3.0
@@ -32,16 +34,17 @@ kiwisolver==1.5.0
 locket==1.0.0
 matplotlib==3.11.0
 multidict==6.7.1
+mypy_extensions==1.1.0
 narwhals==2.20.0
 numpy==2.4.4
 packaging==26.1
 pandas==3.0.2
 partd==1.4.2
+pathspec==1.1.1
 pillow==12.3.0
+platformdirs==4.11.0
+playwright==1.61.0
 plotly==6.7.0
-# polars requires an AVX2-capable CPU (x86-64-v3 or newer). On a VM/hypervisor
-# reporting an older baseline (e.g. kvm64/qemu64), importing polars raises
-# "Illegal instruction" and takes down anything that imports the URLconf.
 polars==1.40.1
 polars-runtime-32==1.40.1
 postgrest==2.31.0
@@ -52,10 +55,12 @@ pyCirclize==1.10.1
 pycparser==3.0
 pydantic==2.13.4
 pydantic_core==2.46.4
+pyee==13.0.1
 PyJWT==2.13.0
 pyparsing==3.3.2
 python-dateutil==2.9.0.post0
 python-dotenv==1.2.2
+pytokens==0.4.1
 PyYAML==6.0.3
 realtime==2.31.0
 six==1.17.0
