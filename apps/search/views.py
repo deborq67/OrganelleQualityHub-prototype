@@ -6,11 +6,10 @@ from apps.organelle_quality.models import OrganelleMetadata
 from apps.taxonomy.models import TaxonomyData
 from datetime import datetime
 import polars as pl
-from django.db.models import Q
+from django.db.models import Max, Min, Q, Sum
 from django.http import HttpResponse, JsonResponse
 import plotly.express as px
 from django.core.cache import cache
-from django.db.models import Sum
 
 """
 Names for the columns from left to right for main table:
@@ -31,7 +30,6 @@ RESULT_COLUMNS = [
     ("ir_annotated", "IR_Annotated", "IRs annotated"),
     ("ir_lengths", "IR_Lengths", "IR lengths"),
     ("ir_equal", "IR_Equal", "IRs equal"),
-    ("duplicate", "Self_Reported_Duplicate", "Self Reported Duplicate?"),
 ]
 
 """
@@ -482,6 +480,44 @@ def results_data(request):
         "duplicate_accession",
     ]
     page = list(qs.order_by(order_field)[start : start + length].values(*fetch_fields))
+    if organelle_type == "mitochondrion":
+        range_qs = OrganelleMetadata.objects.filter(
+            organelle_type__icontains="mitochondrion"
+        )
+    else:
+        range_qs = OrganelleMetadata.objects.filter(
+            Q(organelle_type__icontains="chloroplast")
+            | Q(organelle_type__icontains="plastid")
+        )
+
+    ambiguity_range_cache_key = (
+        f"longest_ambiguity_stretch_range:{organelle_type}"
+    )
+    ambiguity_range = cache.get(ambiguity_range_cache_key)
+    if ambiguity_range is None:
+        ambiguity_range = range_qs.aggregate(
+            minimum=Min("longest_ambiguity_stretch"),
+            maximum=Max("longest_ambiguity_stretch"),
+        )
+        cache.set(ambiguity_range_cache_key, ambiguity_range, timeout=3600)
+
+    ambiguity_min = ambiguity_range["minimum"]
+    ambiguity_max = ambiguity_range["maximum"]
+    ambiguity_content_range_cache_key = f"ambiguity_content_range:{organelle_type}"
+    ambiguity_content_range = cache.get(ambiguity_content_range_cache_key)
+    if ambiguity_content_range is None:
+        ambiguity_content_range = range_qs.aggregate(
+            minimum=Min("ambiguity_content"),
+            maximum=Max("ambiguity_content"),
+        )
+        cache.set(
+            ambiguity_content_range_cache_key,
+            ambiguity_content_range,
+            timeout=3600,
+        )
+
+    ambiguity_content_min = ambiguity_content_range["minimum"]
+    ambiguity_content_max = ambiguity_content_range["maximum"]
     page_accessions = [row["accession"] for row in page]
     ir_map = {
         ir.accession: ir
@@ -492,6 +528,7 @@ def results_data(request):
     for row in page:
         acc = row["accession"]
         row_organelle_type = row.get("organelle_type") or ""
+        is_plastid = row_organelle_type.startswith("plastid")
         is_mito = row_organelle_type.startswith("mitochondrion") or organelle_type == "mitochondrion"
         if is_mito:
             ir_annotated = "n/a"
@@ -513,9 +550,43 @@ def results_data(request):
                 ir_lengths = "-"
                 ir_equal = "-"
 
+        duplicate_accession = (row["duplicate_accession"] or "").strip()
+        is_duplicate = row["duplicate"] == "yes"
+        display_accession = row["accession"]
+        if is_duplicate and duplicate_accession:
+            display_accession = f"{display_accession} ({duplicate_accession})"
+
+        ambiguity_run = row["longest_ambiguity_stretch"]
+        if ambiguity_run is None or ambiguity_min is None or ambiguity_max is None:
+            ambiguity_percentile = None
+        elif ambiguity_max == ambiguity_min:
+            ambiguity_percentile = 100
+        else:
+            ambiguity_percentile = round(
+                (ambiguity_run - ambiguity_min)
+                / (ambiguity_max - ambiguity_min)
+                * 100
+            )
+
+        ambiguity_content = row["ambiguity_content"]
+        if (
+            ambiguity_content is None
+            or ambiguity_content_min is None
+            or ambiguity_content_max is None
+        ):
+            ambiguity_content_percentile = None
+        elif ambiguity_content_max == ambiguity_content_min:
+            ambiguity_content_percentile = 100
+        else:
+            ambiguity_content_percentile = round(
+                (ambiguity_content - ambiguity_content_min)
+                / (ambiguity_content_max - ambiguity_content_min)
+                * 100
+            )
+
         data.append(
             {
-                "accession": row["accession"],
+                "accession": display_accession,
                 "href": f'https://www.ncbi.nlm.nih.gov/nuccore/{row["accession"]}',
                 "title": row["title"] or "",
                 "updated": row["updated"].strftime("%Y/%m/%d") if row["updated"] else "",
@@ -523,18 +594,21 @@ def results_data(request):
                     row["base_pair_length"] if row["base_pair_length"] is not None else ""
                 ),
                 "gc_content": row["gc_content"],
-                "ambiguity_content": row["ambiguity_content"],
+                "ambiguity_content": ambiguity_content,
+                "ambiguity_content_percentile": ambiguity_content_percentile,
                 "longest_ambiguity_stretch": (
-                    row["longest_ambiguity_stretch"]
-                    if row["longest_ambiguity_stretch"] is not None
+                    ambiguity_run
+                    if ambiguity_run is not None
                     else "None"
                 ),
+                "longest_ambiguity_percentile": ambiguity_percentile,
                 "ir_annotated": ir_annotated,
                 "ir_lengths": ir_lengths,
                 "ir_equal": ir_equal,
+                "is_plastid": is_plastid,
                 "duplicate": (
-                    f'yes: {row["duplicate_accession"]}'
-                    if row["duplicate"] == "yes"
+                    ""
+                    if is_duplicate
                     else "no" if row["duplicate"] == "no"
                     else "Unknown"
                 ),

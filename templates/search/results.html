@@ -68,6 +68,23 @@
 {% endcomment %}
 
                             <script>
+                              function markPlastidStatus(data, type, row) {
+                                if (type === 'display' && row.is_plastid && data === 'yes') {
+                                  return data + ' <span aria-label="Yes" style="color: #16803c; font-weight: 700; margin-left: 0.2rem;">&#10003;</span>';
+                                }
+                                if (type === 'display' && row.is_plastid && data === 'no') {
+                                  return data + ' <span aria-label="No" style="color: #b42318; font-weight: 700; margin-left: 0.2rem;">&#10005;</span>';
+                                }
+                                return data;
+                              }
+
+                              function markPlastidNo(data, type, row) {
+                                if (type === 'display' && row.is_plastid && data === 'no') {
+                                  return data + ' <span aria-label="No" style="color: #b42318; font-weight: 700; margin-left: 0.2rem;">&#10005;</span>';
+                                }
+                                return data;
+                              }
+
                               const mainTable = new DataTable('#results-table', {
                                 serverSide: true,
                                 order: [[0, 'desc']],
@@ -103,22 +120,43 @@
                                     }
                                   },
                                   { data: 'gc_content', className: 'quality-col', width: '9%' },
-                                  { data: 'ambiguity_content', className: 'quality-col', width: '9%' },
-                                  { data: 'longest_ambiguity_stretch', className: 'quality-col', width: '9%' },
-                                  { data: 'ir_annotated', className: 'quality-col', width: '9%' },
-                                  { data: 'ir_lengths', className: 'quality-col', width: '9%' },
-                                  { data: 'ir_equal', className: 'quality-col', width: '9%' },
                                   {
-                                    data: 'duplicate',
+                                    data: 'ambiguity_content',
                                     className: 'quality-col',
                                     width: '9%',
                                     render: function (data, type, row) {
-                                      if (type === 'display' && typeof data === 'string' && data.startsWith('yes:')) {
-                                        return '<strong>' + data + '</strong>';
+                                      if (type === 'display' && data !== null && data !== undefined && data !== '') {
+                                        const percentile = row.ambiguity_content_percentile;
+                                        if (percentile === null || percentile === undefined) {
+                                          return data;
+                                        }
+                                        const boundedPercentile = Math.max(0, Math.min(100, Number(percentile)));
+                                        const hue = 120 - (boundedPercentile * 1.2);
+                                        return data + ' <span role="img" title="' + boundedPercentile + 'th percentile" aria-label="' + boundedPercentile + 'th percentile" style="display: inline-block; width: 3.5rem; height: 0.7rem; margin-left: 0.35rem; vertical-align: middle; border: 1px solid #8b949e; border-radius: 2px; background: #f1f3f5; overflow: hidden;"><span style="display: block; width: ' + boundedPercentile + '%; height: 100%; background: hsl(' + hue + ', 70%, 42%);"></span></span>';
                                       }
                                       return data;
                                     }
-                                  }
+                                  },
+                                  {
+                                    data: 'longest_ambiguity_stretch',
+                                    className: 'quality-col',
+                                    width: '9%',
+                                    render: function (data, type, row) {
+                                      if (type === 'display' && data !== null && data !== undefined && data !== '' && data !== 'None') {
+                                        const percentile = row.longest_ambiguity_percentile;
+                                        if (percentile === null || percentile === undefined) {
+                                          return data;
+                                        }
+                                        const boundedPercentile = Math.max(0, Math.min(100, Number(percentile)));
+                                        const hue = 120 - (boundedPercentile * 1.2);
+                                        return data + ' <span role="img" title="' + boundedPercentile + 'th percentile" aria-label="' + boundedPercentile + 'th percentile" style="display: inline-block; width: 3.5rem; height: 0.7rem; margin-left: 0.35rem; vertical-align: middle; border: 1px solid #8b949e; border-radius: 2px; background: #f1f3f5; overflow: hidden;"><span style="display: block; width: ' + boundedPercentile + '%; height: 100%; background: hsl(' + hue + ', 70%, 42%);"></span></span>';
+                                      }
+                                      return data;
+                                    }
+                                  },
+                                  { data: 'ir_annotated', className: 'quality-col', width: '9%', render: markPlastidStatus },
+                                  { data: 'ir_lengths', className: 'quality-col', width: '9%', render: markPlastidNo },
+                                  { data: 'ir_equal', className: 'quality-col', width: '9%', render: markPlastidStatus },
                                 ]
                               });
 
