@@ -47,6 +47,7 @@ def _flush(rows, update, stdout, style):
             irb_reported_start=row['IRb_REPORTED_START'],
             irb_reported_end=row['IRb_REPORTED_END'],
             irb_reported_length=row['IRb_REPORTED_LENGTH'],
+            ir_equal=row['IR_EQUAL'],
         )
         for row in pl.concat(rows).to_dicts()
     ]
@@ -68,7 +69,8 @@ def _flush(rows, update, stdout, style):
                 'irb_reported',
                 'irb_reported_start',
                 'irb_reported_end',
-                'irb_reported_length'
+                'irb_reported_length',
+                'ir_equal',
             ]
         )
     else:

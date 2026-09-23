@@ -722,6 +722,7 @@ class IROperations:
             ir_reported = "no"
         else:
             ir_reported = "exception"
+        ir_equal = self.calculate_ir_equality(ira_feature, irb_feature)
         fields = {
             "ACCESSION": self.rec.id,
             "TITLE": self.rec.description,
@@ -741,6 +742,7 @@ class IROperations:
             "IRb_REPORTED_END": irb_feature.location.end if irb_feature else None,
             "IRb_REPORTED_LENGTH": int(
                 len(irb_feature)) if irb_feature else None,
+            "IR_EQUAL": ir_equal,
         }
         # Forces columns to be integers to avoid any conflicts for null values.
         df = (
@@ -759,3 +761,9 @@ class IROperations:
             )
         )
         return df
+
+    def calculate_ir_equality(self, ira_feature, irb_feature):
+        """Return whether both identified IRs have the same length."""
+        if ira_feature is None or irb_feature is None:
+            return None
+        return "yes" if len(ira_feature) == len(irb_feature) else "no"

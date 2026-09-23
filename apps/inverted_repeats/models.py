@@ -20,6 +20,11 @@ class IR_Identification(models.Model):
         ("no", "No"),
     ]
 
+    IR_EQUAL_CHOICES = [
+        ("yes", "Yes"),
+        ("no", "No"),
+    ]
+
     accession = models.CharField(max_length=50, unique=True)
     title = models.TextField(default="No Title")
     updated = models.DateTimeField(null=True, blank=True, verbose_name="Last Updated")
@@ -66,6 +71,13 @@ class IR_Identification(models.Model):
         null=True,
         blank=True,
         verbose_name="Length of Inverted Repeat B (bp)"
+    )
+    ir_equal = models.CharField(
+        max_length=10,
+        choices=IR_EQUAL_CHOICES,
+        null=True,
+        blank=True,
+        verbose_name="IRs Equal",
     )
     ira_blastinferred = models.CharField(max_length=10, choices=IRB_CHOICES, default="no")
     ira_blastinferred_start = models.IntegerField(

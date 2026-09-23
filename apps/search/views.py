@@ -542,7 +542,7 @@ def results_data(request):
                 len_b = f"{ir_obj.irb_reported_length:,}" if ir_obj.irb_reported_length is not None else "-"
                 ir_lengths = f"{len_a}, {len_b}"
                 if ir_obj.ira_reported_length is not None and ir_obj.irb_reported_length is not None:
-                    ir_equal = "yes" if ir_obj.ira_reported_length == ir_obj.irb_reported_length else "no"
+                    ir_equal = ir_obj.ir_equal or "-"
                 else:
                     ir_equal = "-"
             else:
