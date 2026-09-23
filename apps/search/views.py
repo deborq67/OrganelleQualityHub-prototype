@@ -31,6 +31,7 @@ RESULT_COLUMNS = [
     ("ir_annotated", "IR_Annotated", "IRs annotated"),
     ("ir_lengths", "IR_Lengths", "IR lengths"),
     ("ir_equal", "IR_Equal", "IRs equal"),
+    ("duplicate", "Self_Reported_Duplicate", "Self Reported Duplicate?"),
 ]
 
 """
@@ -477,6 +478,8 @@ def results_data(request):
         "ambiguity_content",
         "longest_ambiguity_stretch",
         "updated",
+        "duplicate",
+        "duplicate_accession",
     ]
     page = list(qs.order_by(order_field)[start : start + length].values(*fetch_fields))
     page_accessions = [row["accession"] for row in page]
@@ -529,6 +532,12 @@ def results_data(request):
                 "ir_annotated": ir_annotated,
                 "ir_lengths": ir_lengths,
                 "ir_equal": ir_equal,
+                "duplicate": (
+                    f'yes: {row["duplicate_accession"]}'
+                    if row["duplicate"] == "yes"
+                    else "no" if row["duplicate"] == "no"
+                    else "Unknown"
+                ),
             }
         )
 

@@ -1,0 +1,26 @@
+from django.core.management.base import BaseCommand, CommandError
+
+from pipelines.analyses.duplication_backfill import DEFAULT_WORKERS, DEFAULT_CHUNKSIZE, run
+from pipelines.exceptions import PipelineError
+
+
+class Command(BaseCommand):
+    help = "Backfills the duplicate and duplicate_accession fields on OrganelleMetadata rows using their source GenBank files."
+
+    def add_arguments(self, parser):
+        parser.add_argument('--workers', type=int, default=None,
+                            help=f'Number of worker processes (default: {DEFAULT_WORKERS}).')
+        parser.add_argument('--chunksize', type=int, default=None,
+                            help=f'Files per worker task (default: auto, capped at {DEFAULT_CHUNKSIZE}).')
+        parser.add_argument('--limit', type=int, default=None,
+                            help='Process at most N rows (useful for testing before a full run).')
+
+    def handle(self, *args, **options):
+        try:
+            updated, failed, missing_files = run(options, self.stdout, self.style)
+        except PipelineError as e:
+            raise CommandError(str(e)) from e
+
+        self.stdout.write(self.style.SUCCESS(
+            f'Done. Backfilled {updated} row(s), {failed} failed, {missing_files} skipped (no file).'
+        ))

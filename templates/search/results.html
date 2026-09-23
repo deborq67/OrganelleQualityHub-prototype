@@ -107,7 +107,18 @@
                                   { data: 'longest_ambiguity_stretch', className: 'quality-col', width: '9%' },
                                   { data: 'ir_annotated', className: 'quality-col', width: '9%' },
                                   { data: 'ir_lengths', className: 'quality-col', width: '9%' },
-                                  { data: 'ir_equal', className: 'quality-col', width: '9%' }
+                                  { data: 'ir_equal', className: 'quality-col', width: '9%' },
+                                  {
+                                    data: 'duplicate',
+                                    className: 'quality-col',
+                                    width: '9%',
+                                    render: function (data, type, row) {
+                                      if (type === 'display' && typeof data === 'string' && data.startsWith('yes:')) {
+                                        return '<strong>' + data + '</strong>';
+                                      }
+                                      return data;
+                                    }
+                                  }
                                 ]
                               });
 

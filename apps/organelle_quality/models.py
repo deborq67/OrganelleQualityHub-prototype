@@ -3,6 +3,11 @@ from django.contrib.postgres.indexes import GinIndex
 
 
 class OrganelleMetadata(models.Model):
+    DUPLICATE_CHOICES = [
+        ("yes", "Yes"),
+        ("no", "No"),
+    ]
+
     accession = models.CharField(max_length=50, unique=True)
     title = models.TextField(null=True, blank=True, db_index=True)
     organelle_type = models.CharField(
@@ -33,6 +38,19 @@ class OrganelleMetadata(models.Model):
         verbose_name="Longest Ambiguity Stretch (bp)", null=True, blank=True
     )
     gene_list = models.JSONField(verbose_name="Gene List", null=True, blank=True)
+    duplicate = models.CharField(
+        verbose_name="Self Reported Duplicate?",
+        max_length=10,
+        choices=DUPLICATE_CHOICES,
+        null=True,
+        blank=True,
+    )
+    duplicate_accession = models.CharField(
+        verbose_name="Duplicate Of",
+        max_length=50,
+        null=True,
+        blank=True,
+    )
 
     def __str__(self):
         return f"{self.accession} Metadata"
