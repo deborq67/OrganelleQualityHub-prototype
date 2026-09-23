@@ -38,7 +38,7 @@
                                     <thead>
                                       <tr>
                                         {% for column in columns %}
-                                          <th scope="col" style="padding-top: 0.25rem; padding-bottom: 0.25rem; white-space: nowrap; max-width: 220px;">{{ column.label }}</th>
+                                          <th scope="col" style="white-space: nowrap; max-width: 220px;">{{ column.label }}</th>
                                         {% endfor %}
                                       </tr>
                                     </thead>
@@ -52,7 +52,7 @@
                                     <thead>
                                       <tr>
                                         {% for column in ir_columns %}
-                                          <th scope="col" style="padding-top: 0.25rem; padding-bottom: 0.25rem; white-space: nowrap;">{{ column.label }}</th>
+                                          <th scope="col" style="white-space: nowrap;">{{ column.label }}</th>
                                         {% endfor %}
                                       </tr>
                                     </thead>
@@ -204,6 +204,21 @@
                                 text-align: center !important;
                                 font-size: 0.775rem !important;
                                 padding: 0.3rem 0.45rem !important;
+                              }
+
+                              /* In scrollX mode DataTables keeps the ORIGINAL <thead> in place
+                                 inside the scrolling table (collapsed to ~0 height) and shows a
+                                 separate cloned header in .dt-scroll-headInner instead. The
+                                 padding rule above applies to that original thead too, which
+                                 stops it collapsing fully and leaves a thin visible/clickable
+                                 strip between the real sticky header and the first data row.
+                                 Zero out its padding/border so it actually disappears. */
+                              #results-table > thead th,
+                              #ir-table > thead th,
+                              table.dataTable#results-table > thead th,
+                              table.dataTable#ir-table > thead th {
+                                padding: 0 !important;
+                                border-bottom: none !important;
                               }
 
                               /* Quality value columns equal width */
